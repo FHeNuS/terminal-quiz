@@ -1,0 +1,28 @@
+{
+  "name": "terminal-quiz",
+  "version": "0.1.0",
+  "authors": [
+    "rafael.ribeiro rafael.ribeiro@creativity.pt"
+  ],
+  "description": "A quiz based on the jquery-terminal plugin.",
+  "main": "dist/js/terminal-quiz.js",
+  "moduleType": [
+    "amd"
+  ],
+  "keywords": [
+    "terminal",
+    "quiz",
+    "js",
+    "jquery"
+  ],
+  "license": "MIT",
+  "homepage": "www.creativity.pt/en",
+  "dependencies": { "jquery.terminal": "0.9.2" },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

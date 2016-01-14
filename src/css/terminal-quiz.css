@@ -1,0 +1,65 @@
+﻿.CombinationQuestion .question-text, .CombinationQuestion .question-description, .combination-format, .combination-format-question {
+    display: inline !important;    
+}
+
+.combination-format-question {
+
+    margin-left: 5px;
+    font-weight: bold;
+    font-style: italic;
+}
+
+.combination-questions > li:first-child {
+
+    margin-top:0px;
+}
+
+.combination-questions > li {
+
+    margin-top:10px;
+}
+
+ul {
+
+    margin-top: 10px;
+}
+
+.list-cmd-name {
+
+    display: inline-block !important;
+    width: 150px;
+}
+
+.list-cmd-desc {
+
+    display: inline-block !important;
+}
+
+.list-cmd-desc:not(:empty):before {
+
+    content: ' - ';
+}
+
+.echo-success {
+    font-weight: bold;
+    color: lightgreen;
+}
+
+.echo-fail {
+    font-weight: bold;
+    color: coral;
+}
+
+.choice-name, .choice-desc {
+
+    display:inline !important;
+}
+
+.choice-desc:not(:empty):before {
+
+    content: ' - '
+}
+
+li {
+    list-style-type: none;
+}

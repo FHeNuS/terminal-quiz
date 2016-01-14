@@ -1,0 +1,7 @@
+/typings
+/bower_components
+/.vscode
+/build
+/node_modules
+/src/**/*.js
+/src/**/*.map

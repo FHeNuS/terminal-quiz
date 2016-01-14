@@ -1,0 +1,25 @@
+{
+  "name": "terminal-quiz",
+  "version": "0.1.0",
+  "description": "A terminal component based on the jquery-terminal plugin.",
+  "author": "Rafael Ribeiro",
+  "repository": {
+    "type": "git"
+  },
+  "devDependencies": {
+    "bower": "^1.7.2",
+    "del": "^2.2.0",
+    "gulp": "*",
+    "gulp-autoprefixer": "^3.1.0",
+    "gulp-concat": "^2.6.0",
+    "gulp-cssnano": "^2.1.0",
+    "gulp-load-plugins": "^1.2.0",
+    "gulp-typescript": "^2.10.0",
+    "gulp-uglify": "^1.5.1",
+    "run-sequence": "^1.1.5",
+    "tsd": "^0.6.5"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  }
+}
