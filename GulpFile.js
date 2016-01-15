@@ -16,19 +16,22 @@ gulp.task('build-clean', function () {
 gulp.task('build-script', function () {
     
     var tsResult = gulp.src([
-        'src/**/*.ts',
+        'src/ts/references.ts',
         'typings/tsd.d.ts'])
                        .pipe($.sourcemaps.init()) // This means sourcemaps will be generated
                        .pipe($.typescript({
                            declaration: true,
+                           out: 'terminal-quiz.js'
                         //    sortOutput: true,
                            // ...
                        }));
 
     return $.merge2([
-        tsResult.dts.pipe(gulp.dest('build/ts')),
+        tsResult.dts
+        // .pipe($.concat('terminal-quiz.d.ts'))
+        .pipe(gulp.dest('build/ts')),
         tsResult.js
-        .pipe($.concat('terminal-quiz.js'))
+        // .pipe($.concat('terminal-quiz.js'))
         .pipe(gulp.dest('build/js'))
     ]);   
 });
