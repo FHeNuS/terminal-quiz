@@ -4,7 +4,11 @@
     "rafael.ribeiro rafael.ribeiro@creativity.pt"
   ],
   "description": "A quiz based on the jquery-terminal plugin.",
-  "main": ["dist/js/terminal-quiz.js", "dist/css/terminal-quiz.css", "dist/ts/terminal-quiz.d.ts"],
+  "main": [
+    "dist/js/terminal-quiz.js",
+    "dist/css/terminal-quiz.css",
+    "dist/ts/terminal-quiz.d.ts"
+  ],
   "moduleType": [
     "amd"
   ],
@@ -16,7 +20,10 @@
   ],
   "license": "MIT",
   "homepage": "www.creativity.pt/en",
-  "dependencies": { "jquery.terminal": "0.9.2" },
+  "dependencies": {
+    "jquery.terminal": "0.9.2",
+    "jasmine-core": "jasmine#~2.4.1"
+  },
   "ignore": [
     "**/.*",
     "node_modules",

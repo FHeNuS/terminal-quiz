@@ -1,11 +1,4 @@
-///ts:ref=TextQuestion.ts
-/// <reference path="./TextQuestion.ts"/> ///ts:ref:generated
-///ts:ref=ChoiceQuestion.ts
-/// <reference path="./ChoiceQuestion.ts"/> ///ts:ref:generated
-///ts:ref=CombinationQuestion.ts
-/// <reference path="./CombinationQuestion.ts"/> ///ts:ref:generated
-///ts:ref=ListQuestion.ts
-/// <reference path="./ListQuestion.ts"/> ///ts:ref:generated
+/// <reference path="references.ts"/>
 module TerminalQuiz {
 
     export interface IQuizOptions {

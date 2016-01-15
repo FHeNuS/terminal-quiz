@@ -1,5 +1,4 @@
-///ts:ref=Question.ts
-/// <reference path="./Question.ts"/> ///ts:ref:generated
+/// <reference path="references.ts"/>
 module TerminalQuiz {
 
     export class TextQuestion extends Question {

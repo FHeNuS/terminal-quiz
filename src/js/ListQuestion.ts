@@ -1,4 +1,5 @@
-﻿module TerminalQuiz {
+﻿/// <reference path="references.ts"/>
+module TerminalQuiz {
 
     export class ListQuestion<T extends Question> extends Question {
 
