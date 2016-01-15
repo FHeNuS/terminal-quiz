@@ -4,7 +4,7 @@
     "rafael.ribeiro rafael.ribeiro@creativity.pt"
   ],
   "description": "A quiz based on the jquery-terminal plugin.",
-  "main": ["dist/js/terminal-quiz.js", "dist/css/terminal-quiz.css"],
+  "main": ["dist/js/terminal-quiz.js", "dist/css/terminal-quiz.css", "dist/ts/terminal-quiz.d.ts"],
   "moduleType": [
     "amd"
   ],
