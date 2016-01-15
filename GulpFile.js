@@ -13,11 +13,17 @@ gulp.task('build-clean', function () {
 });
 
 gulp.task('build-script', function () {
-	return gulp.src([
+	var tsResult =  gulp.src([
         'src/**/*.ts', 'typings/**/*.d.ts'])
 		.pipe($.typescript({
-		}))
-		.pipe(gulp.dest('build/js'));
+            declaration: true,
+            out: 'terminal-quiz.js'
+		}));
+        
+        return $.merge2([
+		tsResult.dts.pipe(gulp.dest('build/ts')),
+		tsResult.js.pipe(gulp.dest('build/js'))
+	]);
 });
 
 gulp.task('build-css', function() {
@@ -38,10 +44,16 @@ gulp.task('dist-css', function () {
 });
 
 gulp.task('dist-script', function () {
-    return gulp.src('build/js/**/*.js')
+    
+    return gulp.src('build/js/terminal-quiz.js')
     .pipe($.uglify())
-    .pipe($.concat('terminal-quiz.js'))
     .pipe(gulp.dest('dist/js'))  
+});
+
+gulp.task('dist-ts', function () {
+    
+    return gulp.src('build/ts/**/terminal-quiz.d.ts')
+    .pipe(gulp.dest('dist/ts'))  
 });
 
 gulp.task('build', ['build-clean'], function() {
@@ -51,5 +63,5 @@ gulp.task('build', ['build-clean'], function() {
 
 gulp.task('dist', ['build', 'build-css', 'build-script', 'dist-clean'], function() {
     
-    gulp.start('dist-css', 'dist-script');
+    gulp.start('dist-css', 'dist-script', 'dist-ts');
 });
