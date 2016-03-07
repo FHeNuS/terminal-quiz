@@ -17,6 +17,7 @@
     "gulp-karma": "0.0.5",
     "gulp-load-plugins": "^1.2.0",
     "gulp-sourcemaps": "^1.6.0",
+    "gulp-tsc": "^1.1.5",
     "gulp-typescript": "^2.10.0",
     "gulp-uglify": "^1.5.1",
     "jasmine-core": "^2.4.1",
@@ -27,7 +28,8 @@
     "merge2": "^0.3.6",
     "phantomjs": "^1.9.19",
     "run-sequence": "^1.1.5",
-    "tsd": "^0.6.5"
+    "tsd": "^0.6.5",
+    "wiredep": "^3.0.0"
   },
   "engines": {
     "node": ">=0.10.0"

@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "module": "amd",
+        "noImplicitAny": false,
+        "removeComments": false,
+        "preserveConstEnums": true,
+        "out": "build/js/terminal-quiz.js",
+        "sourceMap": true
+    },
+    "files": [
+        "src/ts/ChoiceQuestion.ts",
+        "src/ts/CombinationQuestion.ts",
+        "src/ts/ListQuestion.ts",
+        "src/ts/Question.ts",
+        "src/ts/Quiz.ts",
+        "src/ts/TextBuilder.ts",
+        "src/ts/TextQuestion.ts",
+        "typings/tsd.d.ts"
+    ]
+}

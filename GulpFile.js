@@ -13,11 +13,13 @@ gulp.task('build-clean', function () {
     return $.del('build');
 });
 
+var scriptFiles = ['src/ts/references.ts', 'typings/tsd.d.ts'];
+        
+var testFiles = ['tests/**/*.ts', 'typings/**/*.d.ts', 'build/**/*.d.ts'];
+        
 gulp.task('build-script', function () {
     
-    var tsResult = gulp.src([
-        'src/ts/references.ts',
-        'typings/tsd.d.ts'])
+    var tsResult = gulp.src(scriptFiles)
                        .pipe($.sourcemaps.init()) // This means sourcemaps will be generated
                        .pipe($.typescript({
                            declaration: true,
@@ -37,13 +39,17 @@ gulp.task('build-script', function () {
 });
 
 gulp.task('build-tests', ['build-script'], function () {
-    return gulp.src([
-        'tests/**/*.ts', 'typings/**/*.d.ts', 'build/**/*.d.ts'])
+    return gulp.src(testFiles)
         .pipe($.typescript({
             out: 'terminal-quiz-tests.js'
         }))
         .pipe(gulp.dest('build/tests'));
 });
+
+// gulp.task('watch', ['build-script', 'build-tests'], function() {
+//     gulp.watch(scriptFiles, ['build-script']);
+//     gulp.watch(testFiles, ['build-tests']);
+// });
 
 gulp.task('build-css', function () {
 
@@ -80,6 +86,11 @@ gulp.task('build', ['build-clean'], function () {
     gulp.start('build-css', 'build-script', 'build-tests');
 });
 
+gulp.task('buildAndWatch', ['build'], function () {
+
+    gulp.start('watch');
+});
+
 gulp.task('dist', ['build', 'build-css', 'build-script', 'dist-clean'], function () {
 
     gulp.start('dist-css', 'dist-script', 'dist-ts');
@@ -96,4 +107,27 @@ gulp.task('tests', function (done) {
       console.log(err);
       this.emit('end'); //instead of erroring the stream, end it
     });
+});
+
+gulp.task('wiredeps', function (done) {
+
+     return gulp.src('tests/index.html')
+       .pipe($.wiredep.stream(
+    //        {
+    //        fileTypes: {
+    //            html: {
+    //                replace: {
+    //                    js: function (filePath) {
+    //                        //return '<script src="' + '@Url.Content("~/Scripts/Vendor/' + filePath.split('/').pop() + '")"></script>';
+    //                        return '<script src="~/Scripts/Vendor/' + filePath.split('/').pop() + '"></script>';
+    //                    },
+    //                    css: function (filePath) {
+    //                        //return '<link rel="stylesheet" href="' + '@Url.Content("~/Content/Vendor/' + filePath.split('/').pop() + '")"/>';
+    //                        return '<link rel="stylesheet" href="~/Content/Vendor/' + filePath.split('/').pop() + '"/>';
+    //                    }
+    //                }
+    //            }
+    //        },
+    //    }
+       )).pipe(gulp.dest('./tests/'));
 });
