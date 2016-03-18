@@ -12,11 +12,25 @@ module.exports = function (config) {
 
         // list of files / patterns to load in the browser
         files: [
-            , './build/js/**/*.js'
-            , './build/tests/**/*.js'
+            // bower:js
+
+
+
+            , "vendor/js/jquery.js"
+            , "vendor/js/jquery.terminal-min.js"
+            , "vendor/js/jquery.mousewheel-min.js"
+            , "vendor/js/jasmine.js"
+            , "vendor/js/jasmine.js"
+            , "vendor/js/jasmine-jquery.js"
+            // endbower
+            , './build/js/lib/Quiz.js'
+            , './build/js/lib/Question.js'
+            , './build/js/lib/TextQuestion.js'
+            , 'bower_components/jasmine-jquery/lib/jasmine-jquery.js'
+            , './build/js/tests/**.js'
         ],
 
-        preprocessors: {
+        /*preprocessors: {
             'tests/*.ts': ['typescript']
         },
         typescriptPreprocessor: {
@@ -42,7 +56,7 @@ module.exports = function (config) {
         // list of files to exclude
         exclude: [
 
-        ],
+        ],*/
 
         // test results reporter to use
         // possible values: 'dots', 'progress'

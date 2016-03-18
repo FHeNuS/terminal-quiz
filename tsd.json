@@ -6,10 +6,13 @@
   "bundle": "typings/tsd.d.ts",
   "installed": {
     "jquery/jquery.d.ts": {
-      "commit": "d1f6bde13f2209be42e86c3686761e8bfcbb50a5"
+      "commit": "ce8ae773688d2244ba11fdf3378fcd68f773e1c4"
     },
     "jasmine/jasmine.d.ts": {
-      "commit": "7577a2f4c134790891c52affdacdae99d802571b"
+      "commit": "ce8ae773688d2244ba11fdf3378fcd68f773e1c4"
+    },
+    "jasmine-jquery/jasmine-jquery.d.ts": {
+      "commit": "ce8ae773688d2244ba11fdf3378fcd68f773e1c4"
     }
   }
 }

@@ -109,25 +109,54 @@ gulp.task('tests', function (done) {
     });
 });
 
-gulp.task('wiredeps', function (done) {
+gulp.task("wiredeps", ['vendor-scripts', 'vendor-css'], function () {
 
-     return gulp.src('./src/ts/tests/index.html')
-       .pipe($.wiredep.stream(
-    //        {
-    //        fileTypes: {
-    //            html: {
-    //                replace: {
-    //                    js: function (filePath) {
-    //                        //return '<script src="' + '@Url.Content("~/Scripts/Vendor/' + filePath.split('/').pop() + '")"></script>';
-    //                        return '<script src="~/Scripts/Vendor/' + filePath.split('/').pop() + '"></script>';
-    //                    },
-    //                    css: function (filePath) {
-    //                        //return '<link rel="stylesheet" href="' + '@Url.Content("~/Content/Vendor/' + filePath.split('/').pop() + '")"/>';
-    //                        return '<link rel="stylesheet" href="~/Content/Vendor/' + filePath.split('/').pop() + '"/>';
-    //                    }
-    //                }
-    //            }
-    //        },
-    //    }
-  )).pipe(gulp.dest('./src/ts/tests/')).pipe($.expectFile('src/ts/tests/index.html'));
+    return gulp.src([
+    './src/ts/tests/index.html',
+    './karma.conf.js'
+  ]).pipe($.wiredep.stream({
+           fileTypes: {
+               html: {
+                   replace: {
+                       js: function (filePath) {
+                           //return '<script src="' + '@Url.Content("~/Scripts/Vendor/' + filePath.split('/').pop() + '")"></script>';
+                           return '<script src="vendor/js/' + filePath.split('/').pop() + '"></script>';
+                       },
+                       css: function (filePath) {
+                           //return '<link rel="stylesheet" href="' + '@Url.Content("~/Content/Vendor/' + filePath.split('/').pop() + '")"/>';
+                           return '<link rel="stylesheet" href="~/Content/Vendor/' + filePath.split('/').pop() + '"/>';
+                       }
+                   }
+               },
+               js: {
+                 block: /(([ \t]*)\/\/\s*bower:*(\S*)\s*)(\n|\r|.)*?(\/\/\s*endbower\s*)/gi,
+                 detect: {
+                   js: /<script.*src=['"](.+)['"]>/gi,
+               },
+               replace: {
+                 js: function (filePath) {
+                     //return '<script src="' + '@Url.Content("~/Scripts/Vendor/' + filePath.split('/').pop() + '")"></script>';
+                     return ', "vendor/js/' + filePath.split('/').pop() + '"';
+                 }
+               },
+           },
+       }
+     })).pipe(gulp.dest('./'));
+
+});
+
+gulp.task('vendor-scripts', null, function () {
+
+    return gulp.src($.wiredep().js)
+
+      .pipe(gulp.dest('vendor/js'));
+
+});
+
+gulp.task('vendor-css', null, function () {
+
+    return gulp.src($.wiredep().css)
+
+      .pipe(gulp.dest('vendor/css'));
+
 });

@@ -20,7 +20,7 @@
         "src/ts/lib/Quiz.ts",
         "src/ts/lib/TextBuilder.ts",
         "src/ts/lib/TextQuestion.ts",
-        "src/ts/tests/IntegrationTests.ts",
+        "src/ts/tests/Quiz.tests.ts",
         "src/ts/tests/SmokeTests.ts",
         "typings/tsd.d.ts"
     ],
