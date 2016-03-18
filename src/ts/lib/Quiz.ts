@@ -1,4 +1,3 @@
-/// <reference path="references.ts"/>
 module TerminalQuiz {
 
     export interface IQuizOptions {
@@ -181,7 +180,7 @@ module TerminalQuiz {
 
                                                 // This means that it processed all elements, remove interval and invoke callback
                                                 clearInterval(interval);
-                                           
+
                                                 // execute in next interval
                                                 setTimeout(() => {
 

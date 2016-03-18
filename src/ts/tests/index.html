@@ -1,0 +1,28 @@
+<html>
+    <head>
+        <!-- bower:css -->
+        <link rel="stylesheet" href="../../../bower_components/jquery.terminal/css/jquery.terminal.css" />
+        <!-- endbower -->
+    </head>
+    <body>
+        <div id="container" style="border: 1px solid; width:200px;height:200px;"></div>
+        <!-- bower:js -->
+        <script src="../../../bower_components/jquery/dist/jquery.js"></script>
+        <script src="../../../bower_components/jquery.terminal/js/jquery.terminal-min.js"></script>
+        <script src="../../../bower_components/jquery.terminal/js/jquery.mousewheel-min.js"></script>
+        <script src="../../../bower_components/jasmine-core/lib/jasmine-core/jasmine.js"></script>
+        <!-- endbower -->
+        <script type="text/javascript" src="../../../build/js/lib/Quiz.js"></script>
+        <script type="text/javascript" src="../../../build/js/lib/Question.js"></script>
+        <script type="text/javascript" src="../../../build/js/lib/TextQuestion.js"></script>
+        <script type="text/javascript">
+
+            var quiz = new TerminalQuiz.Quiz($("#container").get(0), {
+
+            });
+
+            quiz.start();
+
+        </script>
+    </body>
+</html>

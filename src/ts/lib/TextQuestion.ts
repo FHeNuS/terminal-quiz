@@ -1,9 +1,8 @@
-/// <reference path="references.ts"/>
 module TerminalQuiz {
 
     export class TextQuestion extends Question {
 
-        
+
 
         onAnswer(callback: (answer: string) => void): TextQuestion {
 
@@ -20,6 +19,6 @@ module TerminalQuiz {
             return <TextQuestion>super.asRequired(required);
         }
 
-        
+
     }
 }

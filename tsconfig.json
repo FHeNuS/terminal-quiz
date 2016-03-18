@@ -1,20 +1,30 @@
 {
     "compilerOptions": {
-        "module": "amd",
+        "module": "commonJs",
         "noImplicitAny": false,
         "removeComments": false,
         "preserveConstEnums": true,
-        "out": "build/js/terminal-quiz.js",
-        "sourceMap": true
+        "outDir": "build/js/",
+        "sourceMap": true,
+        "declaration": true
     },
-    "files": [
-        "src/ts/ChoiceQuestion.ts",
-        "src/ts/CombinationQuestion.ts",
-        "src/ts/ListQuestion.ts",
-        "src/ts/Question.ts",
-        "src/ts/Quiz.ts",
-        "src/ts/TextBuilder.ts",
-        "src/ts/TextQuestion.ts",
+    "filesGlob": [
+        "src/ts/*/**.ts",
         "typings/tsd.d.ts"
-    ]
+    ],
+    "files": [
+        "src/ts/lib/ChoiceQuestion.ts",
+        "src/ts/lib/CombinationQuestion.ts",
+        "src/ts/lib/ListQuestion.ts",
+        "src/ts/lib/Question.ts",
+        "src/ts/lib/Quiz.ts",
+        "src/ts/lib/TextBuilder.ts",
+        "src/ts/lib/TextQuestion.ts",
+        "src/ts/tests/IntegrationTests.ts",
+        "src/ts/tests/SmokeTests.ts",
+        "typings/tsd.d.ts"
+    ],
+    "atom": {
+        "rewriteTsconfig": true
+    }
 }

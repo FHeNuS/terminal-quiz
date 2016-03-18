@@ -1,4 +1,3 @@
-﻿/// <reference path="references.ts"/>
 module TerminalQuiz {
     export class CombinationQuestion extends Question {
 
@@ -84,7 +83,7 @@ module TerminalQuiz {
 
                 // Because this question can be nested, we slice the full array to hold only the correct number of values
                 args = args.slice(this.quiz._getNestedLevel() - 1);
-                                
+
                 if (args.length <= this.questions.length) {
 
                     // Retrieves the callback from the question at the imcomplete index
@@ -97,7 +96,7 @@ module TerminalQuiz {
                     callback([]);
                 }
             }
-        }        
+        }
 
         initialize(): void {
 

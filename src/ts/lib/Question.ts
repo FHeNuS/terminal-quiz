@@ -1,4 +1,3 @@
-﻿/// <reference path="references.ts"/>
 module TerminalQuiz {
 
     export interface IQuestionParseResult {
@@ -103,7 +102,7 @@ module TerminalQuiz {
             this.friendlyRegex = friendlyRegex;
 
             return this;
-        } 
+        }
 
         asRequired(required?: () => boolean): Question {
 

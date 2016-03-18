@@ -1,4 +1,3 @@
-﻿/// <reference path="references.ts"/>
 module TerminalQuiz {
 
     export enum ChoiceQuestionMode {
@@ -59,7 +58,7 @@ module TerminalQuiz {
             this.singleItemNameGetter = singleItemNameGetter;
 
             return this;
-        } 
+        }
 
         private getSingleItemName() {
 

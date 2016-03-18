@@ -1,4 +1,3 @@
-﻿/// <reference path="references.ts"/>
 module TerminalQuiz {
 
     export class ListQuestion<T extends Question> extends Question {
@@ -26,10 +25,10 @@ module TerminalQuiz {
 
                     var cmds = "";
 
-                    cmds += Quiz.wrap(Quiz.wrapText("add " + this.question.name, "list-cmd-name") + Quiz.wrapText("Adds the supplied value.", "list-cmd-desc"), "li");                    
-                    cmds += Quiz.wrap(Quiz.wrapText("rem " + this.question.name, "list-cmd-name") + Quiz.wrapText("Removes the suplied value.", "list-cmd-desc"), "li");                    
-                    cmds += Quiz.wrap(Quiz.wrapText("list", "list-cmd-name") + Quiz.wrapText("List the current values.", "list-cmd-desc"), "li");                    
-                    cmds += Quiz.wrap(Quiz.wrapText("done", "list-cmd-name") + Quiz.wrapText("Finishes list edition.", "list-cmd-desc"), "li");                    
+                    cmds += Quiz.wrap(Quiz.wrapText("add " + this.question.name, "list-cmd-name") + Quiz.wrapText("Adds the supplied value.", "list-cmd-desc"), "li");
+                    cmds += Quiz.wrap(Quiz.wrapText("rem " + this.question.name, "list-cmd-name") + Quiz.wrapText("Removes the suplied value.", "list-cmd-desc"), "li");
+                    cmds += Quiz.wrap(Quiz.wrapText("list", "list-cmd-name") + Quiz.wrapText("List the current values.", "list-cmd-desc"), "li");
+                    cmds += Quiz.wrap(Quiz.wrapText("done", "list-cmd-name") + Quiz.wrapText("Finishes list edition.", "list-cmd-desc"), "li");
 
                     return questionDescription + Quiz.wrap(cmds, "ul", "list-cmds");
                 }
@@ -82,7 +81,7 @@ module TerminalQuiz {
                         this.answers.push(innerResult.parsedAnswer);
                         this.quiz.echoSuccess(innerArgs + " added!");
                     }
-                    
+
                     break;
 
                 case "rem":

@@ -1,6 +1,3 @@
-﻿/// <reference path="references.ts"/>
-module TerminalQuiz {
-
     export class TextBuilder {
 
         private text = "";
@@ -38,4 +35,3 @@ module TerminalQuiz {
             return this.text;
         }
     }
-}

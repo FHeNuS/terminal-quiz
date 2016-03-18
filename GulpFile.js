@@ -14,11 +14,11 @@ gulp.task('build-clean', function () {
 });
 
 var scriptFiles = ['src/ts/references.ts', 'typings/tsd.d.ts'];
-        
+
 var testFiles = ['tests/**/*.ts', 'typings/**/*.d.ts', 'build/**/*.d.ts'];
-        
+
 gulp.task('build-script', function () {
-    
+
     var tsResult = gulp.src(scriptFiles)
                        .pipe($.sourcemaps.init()) // This means sourcemaps will be generated
                        .pipe($.typescript({
@@ -35,7 +35,7 @@ gulp.task('build-script', function () {
         tsResult.js
         // .pipe($.concat('terminal-quiz.js'))
         .pipe(gulp.dest('build/js'))
-    ]);   
+    ]);
 });
 
 gulp.task('build-tests', ['build-script'], function () {
@@ -111,7 +111,7 @@ gulp.task('tests', function (done) {
 
 gulp.task('wiredeps', function (done) {
 
-     return gulp.src('tests/index.html')
+     return gulp.src('./src/ts/tests/index.html')
        .pipe($.wiredep.stream(
     //        {
     //        fileTypes: {
@@ -129,5 +129,5 @@ gulp.task('wiredeps', function (done) {
     //            }
     //        },
     //    }
-       )).pipe(gulp.dest('./tests/'));
+  )).pipe(gulp.dest('./src/ts/tests/')).pipe($.expectFile('src/ts/tests/index.html'));
 });
