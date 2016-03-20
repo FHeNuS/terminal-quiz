@@ -7,28 +7,45 @@ module.exports = function (config) {
 
         // frameworks to use
         // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-        frameworks: ['jasmine'],
+        frameworks: ['jasmine-jquery', 'jasmine'],
 
 
         // list of files / patterns to load in the browser
         files: [
-            // bower:js
-
-
-
             , "vendor/js/jquery.js"
             , "vendor/js/jquery.terminal-min.js"
             , "vendor/js/jquery.mousewheel-min.js"
-            , "vendor/js/jasmine.js"
-            , "vendor/js/jasmine.js"
-            , "vendor/js/jasmine-jquery.js"
-            // endbower
+/*
             , './build/js/lib/Quiz.js'
             , './build/js/lib/Question.js'
             , './build/js/lib/TextQuestion.js'
-            , 'bower_components/jasmine-jquery/lib/jasmine-jquery.js'
-            , './build/js/tests/**.js'
+            , './build/js/tests/**.js',
+            */
+            , './src/ts/lib/Quiz.ts'
+            , './src/ts/lib/Question.ts'
+            , './src/ts/lib/TextQuestion.ts'
+            , './src/ts/tests/**.ts'
+            , {
+              pattern: './src/ts/tests/fixtures/*.html',
+              included: false,
+              served: true
+            }
         ],
+        preprocessors: {
+              '**/*.ts': ['typescript', 'sourcemap']
+            },
+            typescriptPreprocessor: {
+              // options passed to typescript compiler
+              tsconfigPath: './tsconfig.json', // *obligatory
+
+
+              // transforming the filenames
+              // you can pass more than one, they will be execute in order
+              transformPath: [function(path) { // *optional
+                return path.replace(/\.ts$/, '.js');
+              }]
+
+            },
 
         /*preprocessors: {
             'tests/*.ts': ['typescript']

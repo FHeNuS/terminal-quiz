@@ -1,3 +1,5 @@
+jasmine.getFixtures().fixturesPath = 'base/src/ts/tests/fixtures';
+
 describe("Quiz", function() {
 
   describe("when executes", function() {
