@@ -98,15 +98,16 @@ gulp.task('dist', ['build', 'build-css', 'build-script', 'dist-clean'], function
 
 gulp.task('tests', function (done) {
 
-    gulp.src('/foo').pipe($.karma({
-      configFile: 'karma.conf.js',
-      action: 'run'
-    }))
+  new $.karma.Server({
+  configFile: __dirname + '/karma.conf.js',
+  singleRun: true
+}, done).start();
+    /*
     .on('error', function(err) {
       // Make sure failed tests cause gulp to exit non-zero
       console.log(err);
       this.emit('end'); //instead of erroring the stream, end it
-    });
+    });*/
 });
 
 gulp.task("wiredeps", ['vendor-scripts', 'vendor-css'], function () {

@@ -2,19 +2,22 @@ jasmine.getFixtures().fixturesPath = 'base/src/ts/tests/fixtures';
 
 describe("Quiz", function() {
 
-  describe("when executes", function() {
+  describe("start", function() {
 
-    it("with no onEnd function does not trigger an error", function() {
+     describe("no questions added", function() {
 
-      loadFixtures('quizContainer.html');
+      it("shoud not throw an error", function() {
 
-      var quiz = new TerminalQuiz.Quiz($("#container").get(0), {
-         typeMessageDelay: 100
+        loadFixtures('quizContainer.html');
+
+        var quiz = new TerminalQuiz.Quiz($("#container").get(0), {
+          typeMessageDelay: 100 });
+
+          quiz.start();
+        });
+
+        });
+
       });
-
-      quiz.start();
-    });
-
-  });
 
 });
