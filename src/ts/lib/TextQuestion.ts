@@ -1,4 +1,4 @@
-module TerminalQuiz {
+ module TerminalQuiz {
 
     export class TextQuestion extends Question {
 
@@ -18,7 +18,5 @@ module TerminalQuiz {
 
             return <TextQuestion>super.asRequired(required);
         }
-
-
     }
 }

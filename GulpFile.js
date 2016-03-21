@@ -100,7 +100,7 @@ gulp.task('tests', function (done) {
 
   new $.karma.Server({
   configFile: __dirname + '/karma.conf.js',
-  singleRun: true
+  singleRun: false
 }, done).start();
     /*
     .on('error', function(err) {

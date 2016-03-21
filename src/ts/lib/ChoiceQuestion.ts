@@ -83,15 +83,15 @@ module TerminalQuiz {
 
             return <ChoiceQuestion<T>>super.withText(text);
         }
-
+ 
         onAnswer(callback: (selectedOption: T) => void): ChoiceQuestion<T> {
 
             return <ChoiceQuestion<T>>super.onAnswer(callback);
         }
 
-        _getCompletionCallback(): (string, callback) => void {
+        _getCompletionCallback(): TerminalQuiz.Autocomplete {
 
-            return (string, callback) => {
+            return (answer, callback) => {
 
                 callback(this.opts.map((item) => {
 

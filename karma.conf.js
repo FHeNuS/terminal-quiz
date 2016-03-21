@@ -12,20 +12,15 @@ module.exports = function (config) {
 
         // list of files / patterns to load in the browser
         files: [
-            , "vendor/js/jquery.js"
-            , "vendor/js/jquery.terminal-min.js"
+            "vendor/js/jquery.js"
+            , "bower_components/jquery.terminal/js/jquery.terminal-src.js"
             , "vendor/js/jquery.mousewheel-min.js"
             , './build/js/lib/Quiz.js'
             , './build/js/lib/Question.js'
             , './build/js/lib/TextQuestion.js'
-            , './build/js/tests/**.js',
-
-            /*
-            , './src/ts/lib/Quiz.ts'
-            , './src/ts/lib/Question.ts'
-            , './src/ts/lib/TextQuestion.ts'
-            , './src/ts/tests/**.ts'
-*/
+            , './build/js/tests/Utils.js'
+            , './build/js/tests/Quiz.tests.js'
+            , './build/js/tests/Question.tests.js'
             , {
               pattern: './src/ts/tests/fixtures/*.html',
               included: false,
@@ -36,11 +31,6 @@ module.exports = function (config) {
               //'**/*.ts': ['typescript', 'sourcemap'],
               '**/*.js': ['sourcemap']
             },
-
-        // list of files to exclude
-        exclude: [
-
-        ],
 
         // test results reporter to use
         // possible values: 'dots', 'progress'
@@ -68,8 +58,8 @@ module.exports = function (config) {
         // start these browsers
         // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
         browsers: [
-            'PhantomJS'
-            // , 'Chrome'
+            // 'PhantomJS'
+            , 'Chrome'
             // , 'Firefox'
             // , 'Safari'
         ],

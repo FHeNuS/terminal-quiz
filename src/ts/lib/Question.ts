@@ -36,7 +36,11 @@ module TerminalQuiz {
             return Quiz.getStringFromStringGetter(this.text);
         }
 
-        public _getCompletionCallback(): (string, callback) => void {
+        /**
+        Returns the callback (if any) responsible for this questions autocomplete.
+        @return Autocomplete callback.
+        */
+        public _getCompletionCallback(): TerminalQuiz.Autocomplete {
 
             return null;
         }
@@ -153,7 +157,7 @@ module TerminalQuiz {
                         }
                     }
 
-                }, this._getCompletionCallback(), "> ");
+                }, this._getCompletionCallback());
             });
         }
     }

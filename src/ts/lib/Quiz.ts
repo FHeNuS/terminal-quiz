@@ -1,30 +1,5 @@
 module TerminalQuiz {
 
-    export interface IQuizOptions {
-
-        backgroundSoundUrl?: string;
-
-        tipyingSoundUrl?: string;
-
-        rightAnswerSoundUrl?: string;
-
-        wrongAnswerSoundUrl?: string;
-
-        typeMessageDelay: number;
-
-        autoStart?: boolean;
-
-        onAnswer?: (question: Question) => void;
-
-        debug?: boolean;
-
-        playBackground?: boolean;
-
-        onEnd?: () => void;
-
-        greetings?: string;
-    }
-
     export class Quiz {
 
         static CMD_SEPARATOR = " ";
@@ -69,13 +44,15 @@ module TerminalQuiz {
         }
 
 
-        constructor(private element: Element, private opts: IQuizOptions) {
+        constructor(private element: Element, private opts?: IQuizOptions) {
 
-            this.backgroundAudio = this.createAudioElement(opts.backgroundSoundUrl);
-            this.typingAudio = this.createAudioElement(opts.tipyingSoundUrl);
-            this.rightAudio = this.createAudioElement(opts.rightAnswerSoundUrl);
-            this.wrongAudio = this.createAudioElement(opts.wrongAnswerSoundUrl);
-            this.shouldPlayBackground = opts.playBackground === undefined || opts.playBackground;
+            if (opts) {
+                this.backgroundAudio = this.createAudioElement(opts.backgroundSoundUrl);
+                this.typingAudio = this.createAudioElement(opts.tipyingSoundUrl);
+                this.rightAudio = this.createAudioElement(opts.rightAnswerSoundUrl);
+                this.wrongAudio = this.createAudioElement(opts.wrongAnswerSoundUrl);
+                this.shouldPlayBackground = opts.playBackground === undefined || opts.playBackground;
+            }
         }
 
         private createAudioElement(src): HTMLAudioElement {
@@ -123,26 +100,26 @@ module TerminalQuiz {
 
                 var prompt = this.term.get_prompt();
 
-                if (this.opts.typeMessageDelay > 0) {
+                if (message.length > 0) {
 
                     this.anim = true;
                     var processed = false;
                     var c = 0;
 
-                    if (message.length > 0) {
+                    this.term.set_prompt('');
 
-                        this.term.set_prompt('');
+                    var msgElem = $("<div>").html(message);
+                    var bags = [];
 
-                        var msgElem = $("<div>").html(message);
-                        var bags = [];
+                    this.separateTextFromElements(msgElem.get(0), bags);
 
-                        this.separateTextFromElements(msgElem.get(0), bags);
+                    this.term.echo("<i/>", {
 
-                        this.term.echo("<i/>", {
+                        raw: true,
 
-                            raw: true,
+                        finalize: (container) => {
 
-                            finalize: (container) => {
+                            try {
 
                                 if (!processed) {
 
@@ -161,6 +138,7 @@ module TerminalQuiz {
                                     var bag = null;
                                     var elem: HTMLElement = null;
                                     var text = null;
+                                    var delay = (this.opts) ? this.opts.typeMessageDelay : 0;
 
                                     var interval = setInterval(() => {
 
@@ -194,23 +172,22 @@ module TerminalQuiz {
                                                     if (finish)
                                                         finish();
 
-                                                }, this.opts.typeMessageDelay);
+                                                }, delay);
                                             }
                                         }
-                                    }, this.opts.typeMessageDelay);
+                                    }, delay);
 
                                 } else {
 
                                     container.append(msgElem);
                                 }
                             }
-                        });
-                    }
+                            catch (e) {
 
-                } else {
-
-                    finish_typing(message, prompt);
-                    finish();
+                                console.error("Error on echo", e);
+                            }
+                        }
+                    });
                 }
             };
         }
@@ -226,14 +203,14 @@ module TerminalQuiz {
             this.greetings = msg;
         }
 
-        private addQuestion(text: Question) {
+        addQuestion(question: Question): Question {
 
-            this.questions.push(text);
+            this.questions.push(question);
 
-            return text;
+            return question;
         }
 
-        echoFail(msg: string) {
+        echoFail(msg: string): void {
 
             this.echo(Quiz.wrapText(msg, "echo-fail"));
             this.playAudio(this.wrongAudio);
@@ -303,61 +280,63 @@ module TerminalQuiz {
             this.opts.onEnd();
         }
 
-        start(): void {
+        onUserCommand(cmd): void {
 
-            this.term = window["$"](this.element).terminal((cmd, term) => {
+            if (cmd.toLowerCase() == "start") {
 
-                if (cmd == 'start') {
+                if (this.shouldPlayBackground)
+                    this.playAudio(this.backgroundAudio, true);
 
-                    if (this.shouldPlayBackground)
-                        this.playAudio(this.backgroundAudio, true);
+                this.term.clear();
 
-                    term.clear();
+                var currentQuestionIdx = 0;
+                var questionCount = this.questions.length;
+                var currentQuestion = this.questions[currentQuestionIdx];
+                var onQuestionAnsweredCallBack = () => {
 
-                    if (this.questions && this.questions.length > 0) {
+                    if (currentQuestion.shouldBeAsked() && this.opts.onAnswer) {
 
-                        var currentQuestionIdx = 0;
-                        var questionCount = this.questions.length;
-                        var currentQuestion = this.questions[currentQuestionIdx];
-                        var onQuestionAnsweredCallBack = () => {
+                        this.opts.onAnswer(currentQuestion);
+                    }
 
-                            if (currentQuestion.shouldBeAsked() && this.opts.onAnswer) {
+                    currentQuestionIdx++;
 
-                                this.opts.onAnswer(currentQuestion);
-                            }
+                    if (currentQuestionIdx < questionCount) {
 
-                            currentQuestionIdx++;
+                        currentQuestion = this.questions[currentQuestionIdx]
 
-                            if (currentQuestionIdx < questionCount) {
+                        if (currentQuestion.shouldBeAsked()) {
 
-                                currentQuestion = this.questions[currentQuestionIdx]
+                            currentQuestion.ask(onQuestionAnsweredCallBack);
 
-                                if (currentQuestion.shouldBeAsked()) {
+                        } else {
 
-                                    currentQuestion.ask(onQuestionAnsweredCallBack);
-
-                                } else {
-
-                                    onQuestionAnsweredCallBack();
-                                }
-
-                            } else {
-
-                                this.end();
-                            }
-                        };
-
-                        currentQuestion.ask(onQuestionAnsweredCallBack);
+                            onQuestionAnsweredCallBack();
+                        }
 
                     } else {
 
                         this.end();
                     }
+                };
 
-                } else {
+                currentQuestion.ask(onQuestionAnsweredCallBack);
 
-                    this.echoFail('unknown command');
-                }
+            } else {
+
+                this.echoFail("Unknown command!");
+            }
+        }
+
+        start(): void {
+
+            if (!this.questions || this.questions.length == 0) {
+                throw new Error("The quiz cannot start because it has no questions!")
+            }
+
+            this.term = window["$"](this.element).terminal((cmd: string, term) => {
+
+                this.onUserCommand(cmd);
 
             }, {
                     name: 'xxx',
@@ -377,8 +356,15 @@ module TerminalQuiz {
                     completion: true,
                     checkArity: false
                 });
+        }
 
-            this.echo(this.opts.greetings);
+        destroy(): void {
+
+            if (this.term) {
+
+                this.term.purge();
+                this.term.destroy();
+            }
         }
 
         /**
@@ -402,7 +388,7 @@ module TerminalQuiz {
             return this.term.level();
         }
 
-        _pushQuestion(answerCallback: (answer: string) => void, completionCallback: (answer, callback) => void, prompt: string | (() => string)): void {
+        _pushQuestion(answerCallback: (answer: string) => void, completionCallback: (answer, callback) => void): void {
 
             var opts = <any>{
 
@@ -434,49 +420,55 @@ module TerminalQuiz {
 
         private playAudio(audio: HTMLAudioElement, loop: boolean = false): void {
 
-            if (loop) {
+            if (audio) {
 
-                if (!this.audioLoopHash[audio.src]) {
+                if (loop) {
 
-                    var handler = function () {
-                        this.currentTime = 0;
-                        this.play();
-                    };
+                    if (!this.audioLoopHash[audio.src]) {
 
-                    this.audioLoopHash[audio.src] = handler;
+                        var handler = function() {
+                            this.currentTime = 0;
+                            this.play();
+                        };
 
-                    // Because the same sound can be triggered more than once, we create a counter to know when it should be terminated;
-                    this.audioLoopCounter[audio.src] = 1;
+                        this.audioLoopHash[audio.src] = handler;
 
-                    audio.addEventListener('ended', handler, false);
+                        // Because the same sound can be triggered more than once, we create a counter to know when it should be terminated;
+                        this.audioLoopCounter[audio.src] = 1;
 
-                    audio.play();
+                        audio.addEventListener('ended', handler, false);
+
+                        audio.play();
+
+                    } else {
+
+                        this.audioLoopCounter[audio.src]++;
+                    }
 
                 } else {
 
-                    this.audioLoopCounter[audio.src]++;
+                    audio.play();
                 }
-
-            } else {
-
-                audio.play();
             }
         }
 
         private stopAudio(audio: HTMLAudioElement) {
 
-            if (this.audioLoopCounter[audio.src] == 1) {
+            if (audio) {
 
-                audio.pause();
-                audio.currentTime = 0;
+                if (this.audioLoopCounter[audio.src] == 1) {
 
-                // Only closes the loop if is the last trigger
-                audio.removeEventListener('ended', this.audioLoopHash[audio.src], false);
-                this.audioLoopHash[audio.src] = null;
+                    audio.pause();
+                    audio.currentTime = 0;
 
-            } else {
+                    // Only closes the loop if is the last trigger
+                    audio.removeEventListener('ended', this.audioLoopHash[audio.src], false);
+                    this.audioLoopHash[audio.src] = null;
 
-                this.audioLoopCounter[audio.src]--;
+                } else {
+
+                    this.audioLoopCounter[audio.src]--;
+                }
             }
         }
     }
