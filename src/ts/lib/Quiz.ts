@@ -43,37 +43,16 @@ module TerminalQuiz {
             return text;
         }
 
+        constructor(private element: Element, private opts: IQuizOptions) {
 
-        constructor(private element: Element, private opts?: IQuizOptions) {
-
-            if (opts) {
-                this.backgroundAudio = this.createAudioElement(opts.backgroundSoundUrl);
-                this.typingAudio = this.createAudioElement(opts.tipyingSoundUrl);
-                this.rightAudio = this.createAudioElement(opts.rightAnswerSoundUrl);
-                this.wrongAudio = this.createAudioElement(opts.wrongAnswerSoundUrl);
-                this.shouldPlayBackground = opts.playBackground === undefined || opts.playBackground;
-            }
         }
 
-        private createAudioElement(src): HTMLAudioElement {
-
-            var audio = document.createElement("audio");
-            audio.src = src;
-            document.body.appendChild(audio);
-
-            return audio;
-        }
-
+        private currentQuestion: Question = null;
         private term: any;
-        private shouldPlayBackground: boolean;
-        private backgroundAudio: HTMLAudioElement;
-        private typingAudio: HTMLAudioElement;
-        private rightAudio: HTMLAudioElement;
-        private wrongAudio: HTMLAudioElement;
+
         private questions = new Array<Question>();
         private anim: boolean = false;
         private greetings: String | (() => string);
-
 
         private separateTextFromElements(elem: Node, bag: any) {
 
@@ -93,7 +72,6 @@ module TerminalQuiz {
                 }
             }
         }
-
 
         private typed(finish_typing: (message, prompt) => void) {
             return (message: string, finish?: () => void) => {
@@ -250,25 +228,7 @@ module TerminalQuiz {
             return <ChoiceQuestion<T>>this.addQuestion(new ChoiceQuestion<T>(name, this));
         }
 
-        playBackgroundMusic(): void {
 
-            if (!this.shouldPlayBackground) {
-
-                this.playAudio(this.backgroundAudio, true);
-
-                this.shouldPlayBackground = true;
-            }
-        }
-
-        muteBackgroundMusic(): void {
-
-            if (this.shouldPlayBackground) {
-
-                this.stopAudio(this.backgroundAudio);
-
-                this.shouldPlayBackground = false;
-            }
-        }
 
         private end() {
 
@@ -328,11 +288,7 @@ module TerminalQuiz {
             }
         }
 
-        start(): void {
-
-            if (!this.questions || this.questions.length == 0) {
-                throw new Error("The quiz cannot start because it has no questions!")
-            }
+        initialize(): void {
 
             this.term = window["$"](this.element).terminal((cmd: string, term) => {
 
@@ -358,6 +314,20 @@ module TerminalQuiz {
                 });
         }
 
+        start(): void {
+
+            if (!this.questions || this.questions.length == 0) {
+                throw new Error("The quiz cannot start because it has no questions!")
+            }
+
+            this.currentQuestion = this.questions[0];
+        }
+
+        getCurrentQuestion(): Question {
+
+            return this.currentQuestion;
+        }
+
         destroy(): void {
 
             if (this.term) {
@@ -381,95 +351,6 @@ module TerminalQuiz {
         _getCommands(): Array<string> {
 
             return this.term.get_command().split(Quiz.CMD_SEPARATOR);
-        }
-
-        _getNestedLevel(): number {
-
-            return this.term.level();
-        }
-
-        _pushQuestion(answerCallback: (answer: string) => void, completionCallback: (answer, callback) => void): void {
-
-            var opts = <any>{
-
-                prompt: "> "
-            };
-
-            if (completionCallback) {
-
-                opts.completion = (terminal, string, callback) => {
-
-                    completionCallback(string, callback);
-                }
-            }
-
-            this.term.push(answerCallback, opts);
-        }
-
-        _popQuestion(): void {
-
-            this.playAudio(this.rightAudio);
-
-            this.term.clear();
-
-            this.term.pop();
-        }
-
-        private audioLoopHash = [];
-        private audioLoopCounter = [];
-
-        private playAudio(audio: HTMLAudioElement, loop: boolean = false): void {
-
-            if (audio) {
-
-                if (loop) {
-
-                    if (!this.audioLoopHash[audio.src]) {
-
-                        var handler = function() {
-                            this.currentTime = 0;
-                            this.play();
-                        };
-
-                        this.audioLoopHash[audio.src] = handler;
-
-                        // Because the same sound can be triggered more than once, we create a counter to know when it should be terminated;
-                        this.audioLoopCounter[audio.src] = 1;
-
-                        audio.addEventListener('ended', handler, false);
-
-                        audio.play();
-
-                    } else {
-
-                        this.audioLoopCounter[audio.src]++;
-                    }
-
-                } else {
-
-                    audio.play();
-                }
-            }
-        }
-
-        private stopAudio(audio: HTMLAudioElement) {
-
-            if (audio) {
-
-                if (this.audioLoopCounter[audio.src] == 1) {
-
-                    audio.pause();
-                    audio.currentTime = 0;
-
-                    // Only closes the loop if is the last trigger
-                    audio.removeEventListener('ended', this.audioLoopHash[audio.src], false);
-                    this.audioLoopHash[audio.src] = null;
-
-                } else {
-
-                    this.audioLoopCounter[audio.src]--;
-                }
-            }
         }
     }
 }

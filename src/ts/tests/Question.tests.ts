@@ -18,7 +18,7 @@ describe("Question", function() {
 
         quiz.addQuestion(dummyQuestion);
 
-        quiz.start();
+        quiz.initialize();
     });
 
     afterEach(() => {

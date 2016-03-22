@@ -2,14 +2,6 @@ module TerminalQuiz {
 
     export interface IQuizOptions {
 
-        backgroundSoundUrl?: string;
-
-        tipyingSoundUrl?: string;
-
-        rightAnswerSoundUrl?: string;
-
-        wrongAnswerSoundUrl?: string;
-
         typeMessageDelay?: number;
 
         autoStart?: boolean;
@@ -18,10 +10,10 @@ module TerminalQuiz {
 
         debug?: boolean;
 
-        playBackground?: boolean;
-
         onEnd?: () => void;
 
         greetings?: string;
+
+        audioManager: QuizAudioManager;
     }
 }

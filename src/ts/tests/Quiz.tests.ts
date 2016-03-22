@@ -22,8 +22,25 @@ describe("Quiz", function() {
 
         quiz.destroy();
     });
-    
-    describe("start", function() {
+
+    describe("initialize", function() {
+
+        it("initializes correctly and expects user input", function() {
+
+            quiz.initialize();
+
+            Utils.type(container, "someCommand", false);
+
+            expect($(container.find(".cmd").children().get(1)).text()).toBe("someCommand");
+        });
+    });
+
+    describe("start", () => {
+
+        beforeEach(() => {
+
+            quiz.initialize();
+        });
 
         it("no questions added should throw an error", function() {
 
@@ -32,59 +49,31 @@ describe("Quiz", function() {
                 quiz.start();
 
             }).toThrowError("The quiz cannot start because it has no questions!")
-
         });
 
-        describe("with proper setup", function() {
+        describe("with questions added ", () => {
 
-            it("initializes correctly and waits for user input", function() {
+            var dummyQuestion = null;
 
-                quiz.addQuestion(new DummyQuestion("something", quiz));
+            beforeEach(() => {
+
+                dummyQuestion = new DummyQuestion("The sample question.", quiz);
+
+                quiz.addQuestion(dummyQuestion);
+            });
+
+            it("should set the first question as the current", function() {
 
                 quiz.start();
 
-                expect(container.data('terminal-quiz')).not.toBeNull();
-
-                spyOn(quiz, 'onUserCommand');
-
-                Utils.type(container, "someCommand");
-
-                expect(quiz.onUserCommand).toHaveBeenCalledWith("someCommand");
+                expect(quiz.getCurrentQuestion()).toBe(dummyQuestion);
             });
-        });
-    });
 
-    describe("onUserCommand", () => {
+            it("should start the background audio", function() {
 
-        var dummyQuestion = null;
-
-        beforeEach(() => {
-
-            dummyQuestion = new DummyQuestion("The sample question.", quiz);
-
-            quiz.addQuestion(dummyQuestion);
-
-            spyOn(dummyQuestion, 'ask');
-
-            quiz.start();
-        });
-
-        it("user types start cmd, asks first question", function() {
-
-            quiz.onUserCommand("start");
-
-            expect(dummyQuestion.ask).toHaveBeenCalled();
-        });
-
-        it("user types unknown cmd, don't ask anything and display error", function() {
-
-            spyOn(quiz, "echoFail");
-
-            quiz.onUserCommand("something");
-
-            expect(dummyQuestion.ask).not.toHaveBeenCalled();
-
-            expect(quiz.echoFail).toHaveBeenCalledWith("Unknown command!");
+                
+                quiz.start();
+            });
         });
     });
 });
