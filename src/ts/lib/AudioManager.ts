@@ -2,15 +2,7 @@ module TerminalQuiz {
 
     export interface QuizAudioManagerOptions {
 
-        backgroundSoundUrl?: string;
-
-        tipyingSoundUrl?: string;
-
-        rightAnswerSoundUrl?: string;
-
-        wrongAnswerSoundUrl?: string;
-
-        playBackground?: boolean;
+        
     }
 
     export class QuizAudioManager {
@@ -35,7 +27,7 @@ module TerminalQuiz {
 
         }
 
-        private createAudioElement(src): HTMLAudioElement {
+        private createAudioElement(name, src): HTMLAudioElement {
 
             var audio = document.createElement("audio");
             audio.src = src;
@@ -44,57 +36,80 @@ module TerminalQuiz {
             return audio;
         }
 
-        unmute(audioName: string): void {
+        isMuted(name: string) {
 
-            if (!this.shouldPlayAudioHash[audioName]) {
+            return !this.shouldPlayAudioHash[name];
+        }
 
-                this.playAudio(audioName, true);
+        unmute(name: string): void {
 
-                this.shouldPlayAudioHash[audioName] = true;
+            if (!this.shouldPlayAudioHash[name]) {
+
+                this.playAudio(name, true);
+
+                this.shouldPlayAudioHash[name] = true;
             }
         }
 
-        mute(audioName: string): void {
+        mute(name: string): void {
 
-            if (this.shouldPlayAudioHash[audioName] === undefined || this.shouldPlayAudioHash[audioName]) {
+            if (this.shouldPlayAudioHash[name]) {
 
-                this.stopAudio(audioName);
+                this.stopAudio(name);
 
-                this.shouldPlayAudioHash[audioName] = false;
+                this.shouldPlayAudioHash[name] = false;
             }
         }
 
-        private getAudio(audioName): HTMLAudioElement {
+        addAudio(name: string, src: string) {
 
-            var audio = this.audioElements[audioName];
+            if (this.getAudio(name, false)) {
 
-            if (!audio) {
+                throw new Error(`The audio named '${name}' was already added!`);
 
-                throw new Error(`The audio "${audioName}" could not be found! Are you sure you called the method addAudio?`);
+            } else {
+
+                this.createAudioElement(name, src);
+                this.shouldPlayAudioHash[name] = true;
+            }
+        }
+
+        private getAudio(name, throwErrorIfNotFound = true): HTMLAudioElement {
+
+            var audio = this.audioElements[name];
+
+            if (!audio && throwErrorIfNotFound) {
+
+                throw new Error(`The audio "${name}" could not be found! Are you sure you called the 'addAudio' method?`);
             }
 
             return audio;
         }
 
-        private playAudio(audioName: string, loop: boolean = false): void {
+        public hasAudio(name: string): boolean {
 
-            if (audioName) {
+            return !!this.getAudio(name, false);
+        }
 
-                var audio = this.getAudio(audioName);
+        private playAudio(name: string, loop: boolean = false): void {
+
+            if (name) {
+
+                var audio = this.getAudio(name);
 
                 if (loop) {
 
-                    if (!this.audioLoopHash[audioName]) {
+                    if (!this.audioLoopHash[name]) {
 
                         var handler = function() {
                             this.currentTime = 0;
                             this.play();
                         };
 
-                        this.audioLoopHash[audioName] = handler;
+                        this.audioLoopHash[name] = handler;
 
                         // Because the same sound can be triggered more than once, we create a counter to know when it should be terminated;
-                        this.audioLoopCounter[audioName] = 1;
+                        this.audioLoopCounter[name] = 1;
 
                         audio.addEventListener('ended', handler, false);
 
@@ -102,7 +117,7 @@ module TerminalQuiz {
 
                     } else {
 
-                        this.audioLoopCounter[audioName]++;
+                        this.audioLoopCounter[name]++;
                     }
 
                 } else {
@@ -112,26 +127,26 @@ module TerminalQuiz {
             }
         }
 
-        private stopAudio(audioName: string) {
+        private stopAudio(name: string) {
 
-            if (audioName) {
+            if (name) {
 
-                var audio = this.getAudio(audioName);
+                var audio = this.getAudio(name);
 
                 if (audio) {
 
-                    if (this.audioLoopCounter[audioName] == 1) {
+                    if (this.audioLoopCounter[name] == 1) {
 
                         audio.pause();
                         audio.currentTime = 0;
 
                         // Only closes the loop if is the last trigger
-                        audio.removeEventListener('ended', this.audioLoopHash[audioName], false);
-                        this.audioLoopHash[audioName] = null;
+                        audio.removeEventListener('ended', this.audioLoopHash[name], false);
+                        this.audioLoopHash[name] = null;
 
                     } else {
 
-                        this.audioLoopCounter[audioName]--;
+                        this.audioLoopCounter[name]--;
                     }
                 }
             }

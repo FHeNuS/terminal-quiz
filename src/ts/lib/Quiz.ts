@@ -2,6 +2,11 @@ module TerminalQuiz {
 
     export class Quiz {
 
+        public static WRONG_AUDIO_NAME = "WrongAudio";
+        public static RIGHT_AUDIO_NAME = "RightAudio";
+        public static BACKGROUND_AUDIO_NAME = "BackgroundAudio";
+        public static TYPING_AUDIO_NAME = "TypingAudio";
+
         static CMD_SEPARATOR = " ";
 
         static wrapText(text: string, ...classes: Array<string>): string {
@@ -10,7 +15,7 @@ module TerminalQuiz {
         }
 
         static wrap(text: string, tag: string, ...classes: Array<string>): string {
-
+            //
             var txt = '<' + tag;
 
             if (classes) {
@@ -47,7 +52,8 @@ module TerminalQuiz {
 
         }
 
-        private currentQuestion: Question = null;
+        private currentQuestionIdx: number;
+        private started = false;
         private term: any;
 
         private questions = new Array<Question>();
@@ -103,7 +109,7 @@ module TerminalQuiz {
 
                                     processed = true;
 
-                                    this.playAudio(this.typingAudio, true);
+                                    this.playAudio(Quiz.TYPING_AUDIO_NAME, true);
 
                                     // Clears dummy element created
                                     container.empty();
@@ -140,7 +146,7 @@ module TerminalQuiz {
                                                 // execute in next interval
                                                 setTimeout(() => {
 
-                                                    this.stopAudio(this.typingAudio);
+                                                    this.stopAudio(Quiz.TYPING_AUDIO_NAME);
 
                                                     // swap command with prompt
                                                     finish_typing(message, prompt);
@@ -191,7 +197,7 @@ module TerminalQuiz {
         echoFail(msg: string): void {
 
             this.echo(Quiz.wrapText(msg, "echo-fail"));
-            this.playAudio(this.wrongAudio);
+            this.playAudio(Quiz.WRONG_AUDIO_NAME);
         }
 
         echoSuccess(msg: string) {
@@ -228,11 +234,9 @@ module TerminalQuiz {
             return <ChoiceQuestion<T>>this.addQuestion(new ChoiceQuestion<T>(name, this));
         }
 
+        public end() {
 
-
-        private end() {
-
-            this.stopAudio(this.backgroundAudio);
+            this.stopAudio(Quiz.BACKGROUND_AUDIO_NAME);
 
             this.term.clear();
             this.term.set_prompt("> ");
@@ -244,8 +248,7 @@ module TerminalQuiz {
 
             if (cmd.toLowerCase() == "start") {
 
-                if (this.shouldPlayBackground)
-                    this.playAudio(this.backgroundAudio, true);
+                this.playAudio(Quiz.BACKGROUND_AUDIO_NAME, true);
 
                 this.term.clear();
 
@@ -267,7 +270,7 @@ module TerminalQuiz {
 
                         if (currentQuestion.shouldBeAsked()) {
 
-                            currentQuestion.ask(onQuestionAnsweredCallBack);
+
 
                         } else {
 
@@ -280,14 +283,15 @@ module TerminalQuiz {
                     }
                 };
 
-                currentQuestion.ask(onQuestionAnsweredCallBack);
-
             } else {
 
                 this.echoFail("Unknown command!");
             }
         }
 
+        /**
+        Initializes the quiz without starting it.
+        */
         initialize(): void {
 
             this.term = window["$"](this.element).terminal((cmd: string, term) => {
@@ -314,18 +318,53 @@ module TerminalQuiz {
                 });
         }
 
+        /**
+        Starts the quiz.
+        */
         start(): void {
 
             if (!this.questions || this.questions.length == 0) {
                 throw new Error("The quiz cannot start because it has no questions!")
             }
 
-            this.currentQuestion = this.questions[0];
+            this.currentQuestionIdx = 0;
+
+            this.playAudio(Quiz.BACKGROUND_AUDIO_NAME, true);
+
+            this.started = true;
+        }
+
+        /**
+        Indicates if the quiz already started or not.
+        */
+        hasStarted(): boolean {
+
+            return this.started;
+        }
+
+        goToNextQuestion(): boolean {
+
+            if (!this.started)
+                throw new Error("Cannot go to the next question because the quiz did not start yet! Did you call the start method?");
+
+            var isLastQuestion = this.currentQuestionIdx == (this.questions.length -1);
+
+            if (isLastQuestion) {
+
+                this.end();
+
+            } else {
+
+                // If it did not reach the last question, advances
+                this.currentQuestionIdx++;
+            }
+
+            return !isLastQuestion;
         }
 
         getCurrentQuestion(): Question {
 
-            return this.currentQuestion;
+            return this.questions[this.currentQuestionIdx];
         }
 
         destroy(): void {
@@ -337,20 +376,12 @@ module TerminalQuiz {
             }
         }
 
-        /**
-        Returns the current supplied command string.
-        */
-        _getCommandString(): string {
+        private playAudio(name: string, loop = false) {
 
-            return this.term.get_command();
         }
 
-        /**
-        Returns the current supplied list of commands.
-        */
-        _getCommands(): Array<string> {
+        private stopAudio(name: string) {
 
-            return this.term.get_command().split(Quiz.CMD_SEPARATOR);
         }
     }
 }

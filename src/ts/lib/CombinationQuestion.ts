@@ -79,10 +79,11 @@ module TerminalQuiz {
 
             return (string, callback) => {
 
-                var args = this.quiz._getCommands();
+                var args = [];
+                //var args = this.quiz._getCommands();
 
                 // Because this question can be nested, we slice the full array to hold only the correct number of values
-                args = args.slice(this.quiz._getNestedLevel() - 1);
+                //args = args.slice(this.quiz._getNestedLevel() - 1);
 
                 if (args.length <= this.questions.length) {
 

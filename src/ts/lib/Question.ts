@@ -132,33 +132,5 @@ module TerminalQuiz {
 
             return (this.ifCallback) ? this.ifCallback() : true;
         }
-
-        public ask(callback: (answer: any) => void): void {
-
-            this.initialize();
-
-            var fullText = this._getParsedFullText();
-
-            this.quiz.echo(this._getParsedFullText(), () => {
-
-                this.quiz._pushQuestion((answer: string) => {
-
-                    var parseResult = this._parseAnswer(answer);
-
-                    if (parseResult.isValid) {
-
-                        if (!parseResult.keepAlive) {
-
-                            this.onAnswerCb(parseResult.parsedAnswer);
-
-                            this.quiz._popQuestion();
-
-                            callback(parseResult.parsedAnswer);
-                        }
-                    }
-
-                }, this._getCompletionCallback());
-            });
-        }
     }
 }

@@ -14,6 +14,14 @@ module TerminalQuiz {
 
         greetings?: string;
 
-        audioManager: QuizAudioManager;
+        backgroundSoundUrl?: string;
+
+        tipyingSoundUrl?: string;
+
+        rightAnswerSoundUrl?: string;
+
+        wrongAnswerSoundUrl?: string;
+
+        playBackground?: boolean;
     }
 }

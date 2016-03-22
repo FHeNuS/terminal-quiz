@@ -12,7 +12,9 @@ describe("Question", function() {
 
         container = $("#container");
 
-        quiz = new TerminalQuiz.Quiz(container.get(0));
+        quiz = new TerminalQuiz.Quiz(container.get(0), {
+
+        });
 
         dummyQuestion = new DummyQuestion("Question1", quiz).withText("A simple question?");
 
@@ -24,17 +26,5 @@ describe("Question", function() {
     afterEach(() => {
 
         quiz.destroy();
-    });
-
-    describe("ask", function() {
-
-        it("no onAnswer defined show not throw an error", function() {
-
-            dummyQuestion.ask(() => {
-
-            });
-
-            Utils.type(container, "");
-        });
     });
 });

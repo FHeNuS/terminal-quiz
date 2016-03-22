@@ -44,7 +44,7 @@ module TerminalQuiz {
 
             return (string, callback) => {
 
-                var args = this.quiz._getCommands();
+                var args = [];
 
                 if (args.length == 1) {
 
