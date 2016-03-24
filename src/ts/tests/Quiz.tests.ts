@@ -35,6 +35,23 @@ describe("Quiz", function() {
         });
     });
 
+    describe("addQuestion", () => {
+
+        describe("duplicated question name", () => {
+
+            it("should throw an Error", () => {
+                
+                quiz.addQuestion(new DummyQuestion("sameName"));
+
+                expect(() => {
+
+                    quiz.addQuestion(new DummyQuestion("sameName"));
+
+                }).toThrowError(`Cannot add a question named 'sameName' twice!`);
+            });
+        });
+    });
+
     describe("start", () => {
 
         beforeEach(() => {

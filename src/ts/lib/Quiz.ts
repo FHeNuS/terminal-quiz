@@ -335,6 +335,8 @@ module TerminalQuiz {
 
             if (question) {
 
+                this.term.clear();
+                
                 question.initialize();
 
                 var questionElem = $(`<div class="${question.constructor.toString().match(/\w+/g)[1]}"></div>`);

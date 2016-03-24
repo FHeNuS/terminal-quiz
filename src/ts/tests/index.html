@@ -27,6 +27,7 @@
             quiz.initialize();
 
             quiz.addQuestion(new TerminalQuiz.TextQuestion("SampleQuestion").withTitle("A question?").asRequired());
+            quiz.addQuestion(new TerminalQuiz.TextQuestion("SampleQuestion2").withTitle("Another question?").asRequired());
 
             quiz.start();
 
