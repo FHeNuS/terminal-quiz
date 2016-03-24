@@ -17,9 +17,11 @@ module TerminalQuiz {
             this.answers = new Array<any>();
             this.question.initialize();
 
+/*
             if (!this.description) {
 
-                this.description = () => {
+
+                this.detail = () => {
 
                     var questionDescription = Quiz.wrapText(this.question._getParsedFullText(), "list-inner-question");
 
@@ -32,13 +34,17 @@ module TerminalQuiz {
 
                     return questionDescription + Quiz.wrap(cmds, "ul", "list-cmds");
                 }
+
             }
+            */
         }
 
+        /*
         onAnswer(callback: (answers: Array<any>) => void): ListQuestion<T> {
 
-            return <ListQuestion<T>>super.onAnswer(callback);
+            return <ListQuestion<T>>super.onUserCommand(callback);
         }
+        */
 
         _getCompletionCallback(): (string, callback) => void {
 
@@ -53,13 +59,16 @@ module TerminalQuiz {
 
                 } else {
 
+                    /*
                     this.question._getCompletionCallback()(string, callback);
+                    */
                 }
 
             }
         }
 
-        _parseAnswer(answer: string): IQuestionParseResult {
+        /*
+        parseUserAnswer(answer: string): IQuestionParseResult {
 
             var result = <IQuestionParseResult>{};
             result.keepAlive = true;
@@ -72,7 +81,7 @@ module TerminalQuiz {
                 case "add":
 
                     var innerArgs = args.slice(1).join(Quiz.CMD_SEPARATOR);
-                    var innerResult = this.question._parseAnswer(innerArgs);
+                    var innerResult = this.question.parseUserAnswer(innerArgs);
 
                     result.isValid = innerResult.isValid;
 
@@ -99,5 +108,6 @@ module TerminalQuiz {
 
             return result;
         }
+        */
     }
 }

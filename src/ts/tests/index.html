@@ -14,14 +14,19 @@
         <!-- endbower -->
         <script type="text/javascript" src="../../../build/js/lib/Quiz.js"></script>
         <script type="text/javascript" src="../../../build/js/lib/Question.js"></script>
+        <script type="text/javascript" src="../../../build/js/lib/QuestionProcessor.js"></script>
+        <script type="text/javascript" src="../../../build/js/lib/QuestionAnswer.js"></script>
         <script type="text/javascript" src="../../../build/js/lib/TextQuestion.js"></script>
         <script type="text/javascript">
 
             var quiz = new TerminalQuiz.Quiz($("#container").get(0), {
 
+              typeMessageDelay: 50
             });
 
-            quiz.addTextQuestion("something").withText("Something question!");
+            quiz.initialize();
+
+            quiz.addQuestion(new TerminalQuiz.TextQuestion("SampleQuestion").withTitle("A question?").asRequired());
 
             quiz.start();
 

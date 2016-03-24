@@ -17,6 +17,8 @@ module.exports = function (config) {
             , "vendor/js/jquery.mousewheel-min.js"
             , './build/js/lib/Quiz.js'
             , './build/js/lib/Question.js'
+            , './build/js/lib/QuestionAnswer.js'
+            , './build/js/lib/QuestionProcessor.js'
             , './build/js/lib/TextQuestion.js'
             , './build/js/tests/Utils.js'
             , './build/js/tests/Quiz.tests.js'

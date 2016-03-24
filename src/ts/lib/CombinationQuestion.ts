@@ -5,15 +5,12 @@ module TerminalQuiz {
         private showFormat: boolean = true;
         private showQuestions: boolean = true;
 
+        /*
         onAnswer(callback: (answers: Array<any>) => void): CombinationQuestion {
 
-            return <CombinationQuestion>super.onAnswer(callback);
+            return <CombinationQuestion>super.onUserCommand(callback);
         }
-
-        withText(text: string | (() => string)): CombinationQuestion {
-
-            return <CombinationQuestion>super.withText(text);
-        }
+        */
 
         hideCombinationFormat(): CombinationQuestion{
 
@@ -37,7 +34,8 @@ module TerminalQuiz {
             return this;
         }
 
-        public _parseAnswer(answer: string): IQuestionParseResult {
+        /*
+        public parseUserAnswer(answer: string): IQuestionParseResult {
 
             var result = <IQuestionParseResult>{};
 
@@ -57,7 +55,7 @@ module TerminalQuiz {
 
                 args.forEach((arg, idx) => {
 
-                    var innerResult = this.questions[idx]._parseAnswer(arg);
+                    var innerResult = this.questions[idx].parseUserAnswer(arg);
 
                     if (innerResult.isValid) {
 
@@ -74,7 +72,7 @@ module TerminalQuiz {
 
             return result;
         }
-
+        */
         public _getCompletionCallback(): (string, callback) => void {
 
             return (string, callback) => {
@@ -90,7 +88,9 @@ module TerminalQuiz {
                     // Retrieves the callback from the question at the imcomplete index
                     var lastIdx = args.length - 1;
 
+                    /*
                     this.questions[lastIdx]._getCompletionCallback()(string, callback);
+                    */
 
                 } else {
 
@@ -108,9 +108,11 @@ module TerminalQuiz {
                 q.initialize();
             });
 
+/*
             if (!this.description) {
 
-                this.description = () => {
+
+                this.detail = () => {
 
                     var answerFormat = '';
 
@@ -138,7 +140,9 @@ module TerminalQuiz {
 
                     return questions + answerFormat;
                 }
+
             }
+            */
         }
     }
 }

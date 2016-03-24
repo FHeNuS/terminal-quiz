@@ -9,45 +9,6 @@ module TerminalQuiz {
 
         static CMD_SEPARATOR = " ";
 
-        static wrapText(text: string, ...classes: Array<string>): string {
-
-            return Quiz.wrap(text, "div", ...classes);
-        }
-
-        static wrap(text: string, tag: string, ...classes: Array<string>): string {
-            //
-            var txt = '<' + tag;
-
-            if (classes) {
-                txt += ' class="';
-                txt += classes.join(" ");
-                txt += '">';
-            }
-
-            txt += text + '</' + tag + '>'
-
-            return txt;
-        }
-
-        static getStringFromStringGetter(getter: string | (() => string)) {
-
-            var text = "";
-
-            if (getter) {
-
-                if (typeof getter === "string") {
-
-                    text = <string>getter;
-
-                } else {
-
-                    text = (<(() => string)>getter)();
-                }
-            }
-
-            return text;
-        }
-
         constructor(private element: Element, private opts: IQuizOptions) {
 
         }
@@ -57,6 +18,9 @@ module TerminalQuiz {
         private term: any;
 
         private questions = new Array<Question>();
+        private answers: {
+            [name: string]: QuestionAnswer
+        } = {};
         private anim: boolean = false;
         private greetings: String | (() => string);
 
@@ -79,108 +43,108 @@ module TerminalQuiz {
             }
         }
 
-        private typed(finish_typing: (message, prompt) => void) {
-            return (message: string, finish?: () => void) => {
+        private animatedType(message: HTMLElement, onFinish: () => void): void {
+
+            if (message.outerHTML.length > 0) {
 
                 var prompt = this.term.get_prompt();
 
-                if (message.length > 0) {
+                this.anim = true;
+                var processed = false;
+                var c = 0;
 
-                    this.anim = true;
-                    var processed = false;
-                    var c = 0;
+                this.term.set_prompt('');
 
-                    this.term.set_prompt('');
+                var msgElem = $(message);
+                var bags = [];
 
-                    var msgElem = $("<div>").html(message);
-                    var bags = [];
+                this.separateTextFromElements(msgElem.get(0), bags);
 
-                    this.separateTextFromElements(msgElem.get(0), bags);
+                this.term.echo("<i/>", {
 
-                    this.term.echo("<i/>", {
+                    raw: true,
 
-                        raw: true,
+                    finalize: (container) => {
 
-                        finalize: (container) => {
+                        try {
 
-                            try {
+                            if (!processed) {
 
-                                if (!processed) {
+                                processed = true;
 
-                                    processed = true;
+                                this.playAudio(Quiz.TYPING_AUDIO_NAME, true);
 
-                                    this.playAudio(Quiz.TYPING_AUDIO_NAME, true);
+                                // Clears dummy element created
+                                container.empty();
 
-                                    // Clears dummy element created
-                                    container.empty();
+                                // Appends elements stripped from text
+                                container.append(msgElem);
 
-                                    // Appends elements stripped from text
-                                    container.append(msgElem);
+                                var charIdx = 0;
+                                var bagIdx = 0;
+                                var bag = null;
+                                var elem: HTMLElement = null;
+                                var text = null;
+                                var delay = (this.opts) ? this.opts.typeMessageDelay : 0;
 
-                                    var charIdx = 0;
-                                    var bagIdx = 0;
-                                    var bag = null;
-                                    var elem: HTMLElement = null;
-                                    var text = null;
-                                    var delay = (this.opts) ? this.opts.typeMessageDelay : 0;
+                                var interval = setInterval(() => {
 
-                                    var interval = setInterval(() => {
+                                    bag = bags[bagIdx];
+                                    elem = bag.elem;
+                                    text = bag.text;
 
-                                        bag = bags[bagIdx];
-                                        elem = bag.elem;
-                                        text = bag.text;
+                                    elem.textContent += bag.text[charIdx++];
 
-                                        elem.textContent += bag.text[charIdx++];
+                                    if (charIdx == text.length) {
 
-                                        if (charIdx == text.length) {
+                                        // This means it reached the end of one element. Move to the next and restart char counter.
+                                        bagIdx++;
+                                        charIdx = 0;
 
-                                            // This means it reached the end of one element. Move to the next and restart char counter.
-                                            bagIdx++;
-                                            charIdx = 0;
+                                        if (bagIdx == bags.length) {
 
-                                            if (bagIdx == bags.length) {
+                                            // This means that it processed all elements, remove interval and invoke callback
+                                            clearInterval(interval);
 
-                                                // This means that it processed all elements, remove interval and invoke callback
-                                                clearInterval(interval);
+                                            // execute in next interval
+                                            setTimeout(() => {
 
-                                                // execute in next interval
-                                                setTimeout(() => {
+                                                this.stopAudio(Quiz.TYPING_AUDIO_NAME);
 
-                                                    this.stopAudio(Quiz.TYPING_AUDIO_NAME);
+                                                // swap command with prompt
+                                                this.anim = false;
 
-                                                    // swap command with prompt
-                                                    finish_typing(message, prompt);
+                                                this.term.set_prompt(prompt);
 
-                                                    this.anim = false;
+                                                if (onFinish)
+                                                    onFinish();
 
-                                                    if (finish)
-                                                        finish();
-
-                                                }, delay);
-                                            }
+                                            }, delay);
                                         }
-                                    }, delay);
+                                    }
+                                }, delay);
 
-                                } else {
+                            } else {
 
-                                    container.append(msgElem);
-                                }
-                            }
-                            catch (e) {
-
-                                console.error("Error on echo", e);
+                                container.append(msgElem);
                             }
                         }
-                    });
-                }
-            };
+                        catch (e) {
+
+                            console.error("Error on echo", e);
+                        }
+                    }
+                });
+            }
         }
 
-        echo = this.typed((message, prompt) => {
-            this.term.set_command('');
-            //this.term.echo(message, { raw: true })
-            this.term.set_prompt(prompt);
-        });
+        private echo(message: HTMLElement) {
+
+            this.animatedType(message, () => {
+
+                this.term.set_command('');
+            });
+        }
 
         setGreetings(msg: string | (() => string)): void {
 
@@ -196,15 +160,17 @@ module TerminalQuiz {
 
         echoFail(msg: string): void {
 
-            this.echo(Quiz.wrapText(msg, "echo-fail"));
+            this.echo($(`<div class="echo-fail">${msg}</div>`).get(0));
             this.playAudio(Quiz.WRONG_AUDIO_NAME);
         }
 
         echoSuccess(msg: string) {
 
-            this.echo(Quiz.wrapText(msg, "echo-success"));
+            this.echo($(`<div class="echo-success">${msg}</div>`).get(0));
+            this.playAudio(Quiz.RIGHT_AUDIO_NAME);
         }
 
+        /*
         addTextQuestion(name: string): TextQuestion {
 
             return <TextQuestion>this.addQuestion(new TextQuestion(name, this));
@@ -233,7 +199,7 @@ module TerminalQuiz {
 
             return <ChoiceQuestion<T>>this.addQuestion(new ChoiceQuestion<T>(name, this));
         }
-
+        */
         public end() {
 
             this.stopAudio(Quiz.BACKGROUND_AUDIO_NAME);
@@ -244,49 +210,63 @@ module TerminalQuiz {
             this.opts.onEnd();
         }
 
+        getAnswer(question: Question): QuestionAnswer {
+
+            var answer = this.answers[question.getName()];
+
+            if (!answer) {
+
+                answer = this.answers[question.getName()] = new QuestionAnswer();
+            }
+
+            return answer;
+        }
+
         onUserCommand(cmd): void {
 
-            if (cmd.toLowerCase() == "start") {
+            var question = this.getCurrentQuestion();
 
-                this.playAudio(Quiz.BACKGROUND_AUDIO_NAME, true);
+            if (question) {
 
-                this.term.clear();
+                var answer = this.getAnswer(question);
 
-                var currentQuestionIdx = 0;
-                var questionCount = this.questions.length;
-                var currentQuestion = this.questions[currentQuestionIdx];
-                var onQuestionAnsweredCallBack = () => {
-
-                    if (currentQuestion.shouldBeAsked() && this.opts.onAnswer) {
-
-                        this.opts.onAnswer(currentQuestion);
-                    }
-
-                    currentQuestionIdx++;
-
-                    if (currentQuestionIdx < questionCount) {
-
-                        currentQuestion = this.questions[currentQuestionIdx]
-
-                        if (currentQuestion.shouldBeAsked()) {
-
-
-
-                        } else {
-
-                            onQuestionAnsweredCallBack();
-                        }
-
-                    } else {
-
-                        this.end();
-                    }
-                };
-
-            } else {
-
-                this.echoFail("Unknown command!");
+                answer.userAnswer = cmd;
+                answer.parsedAnswer = this.getCurrentQuestion().getProcessor().parseUserAnswer(answer.userAnswer);
             }
+        }
+
+        validateCurrentAnswer(): boolean {
+
+            var isValid = false;
+            var question = this.getCurrentQuestion();
+
+            if (question) {
+
+                var answer = this.getAnswer(question);
+
+                // By default is valid
+                answer.isValid = true;
+
+                question.getProcessor().validateAnswer(answer.userAnswer, {
+
+                    echoFail: (msg) => {
+
+                        // If any fail message is raised, it is marked as invalid
+                        answer.isValid = false;
+
+                        this.echoFail(msg);
+                    },
+
+                    echoSuccess: (msg) => {
+
+                        this.echoSuccess(msg);
+                    }
+                });
+
+                isValid = answer.isValid;
+            }
+
+            return isValid;
         }
 
         /**
@@ -298,9 +278,11 @@ module TerminalQuiz {
 
                 this.onUserCommand(cmd);
 
+                this.goToNextQuestion();
+
             }, {
                     name: 'xxx',
-                    //width: 800,
+                    //width: 800,a
                     //height: 300,
                     keydown: (e) => {
 
@@ -332,6 +314,8 @@ module TerminalQuiz {
             this.playAudio(Quiz.BACKGROUND_AUDIO_NAME, true);
 
             this.started = true;
+
+            this.askCurrentQuestion();
         }
 
         /**
@@ -342,24 +326,61 @@ module TerminalQuiz {
             return this.started;
         }
 
-        goToNextQuestion(): boolean {
+        /**
+        Asks the current question.
+        */
+        askCurrentQuestion(): void {
+
+            var question = this.getCurrentQuestion();
+
+            if (question) {
+
+                question.initialize();
+
+                var questionElem = $(`<div class="${question.constructor.toString().match(/\w+/g)[1]}"></div>`);
+
+                var titleElem = question.getTitle()();
+
+                var descriptionElem = question.getDescription()();
+
+                var detailElem = question.getProcessor().getDetail();
+
+                questionElem.append(titleElem);
+
+                if (descriptionElem)
+                    questionElem.append(descriptionElem);
+
+                if (detailElem)
+                    questionElem.append(detailElem);
+
+                this.echo(questionElem.get(0));
+            }
+        }
+
+        /**
+        Goes to the next question.
+        */
+        goToNextQuestion(): void {
 
             if (!this.started)
                 throw new Error("Cannot go to the next question because the quiz did not start yet! Did you call the start method?");
 
-            var isLastQuestion = this.currentQuestionIdx == (this.questions.length -1);
+            if (this.validateCurrentAnswer()) {
 
-            if (isLastQuestion) {
+                var isLastQuestion = this.currentQuestionIdx == (this.questions.length - 1);
 
-                this.end();
+                if (isLastQuestion) {
 
-            } else {
+                    this.end();
 
-                // If it did not reach the last question, advances
-                this.currentQuestionIdx++;
+                } else {
+
+                    // If it did not reach the last question, advances
+                    this.currentQuestionIdx++;
+
+                    this.askCurrentQuestion();
+                }
             }
-
-            return !isLastQuestion;
         }
 
         getCurrentQuestion(): Question {

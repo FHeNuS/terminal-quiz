@@ -2,21 +2,35 @@
 
     export class TextQuestion extends Question {
 
+        protected regex: RegExp;
 
+        protected friendlyRegex: string;
 
-        onAnswer(callback: (answer: string) => void): TextQuestion {
+        withPattern(regex: RegExp, friendlyRegex: string): this {
 
-            return <TextQuestion>super.onAnswer(callback);
+            this.regex = regex;
+            this.friendlyRegex = friendlyRegex;
+
+            return this;
         }
 
-        withText(text: string | (() => string)): TextQuestion {
+        initialize() : void {
 
-            return <TextQuestion>super.withText(text);
+            if (!this.getProcessor()) {
+
+                this.withProcessor(new TextQuestionProcessor(this));
+            }
+
+            super.initialize();
         }
+    }
 
-        asRequired(required?: () => boolean): TextQuestion {
+    export class TextQuestionProcessor extends QuestionProcessor {
 
-            return <TextQuestion>super.asRequired(required);
+        getDetail(): HTMLElement {
+
+            // Text questions by default do not have detail
+            return null;
         }
     }
 }

@@ -1,7 +1,7 @@
 module TerminalQuiz.Tests {
 
     export class DummyQuestion extends TerminalQuiz.Question {
-
+        
     }
 
     export class Utils {

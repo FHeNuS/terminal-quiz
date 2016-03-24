@@ -25,25 +25,29 @@ module TerminalQuiz {
                 this.singleItemNameGetter = this.name;
             }
 
-            if (!this.description) {
+            /*
+                        if (!this.description) {
 
-                this.description = () => {
 
-                    var txt = "";
+                            this.detail = () => {
 
-                    this.opts.forEach((opt) => {
+                                var txt = "";
 
-                        var optTxt = Quiz.wrap(this.nameGetter(opt), "div", "choice-name");
+                                this.opts.forEach((opt) => {
 
-                        if (this.descGetter)
-                            optTxt += Quiz.wrap(this.descGetter(opt), "div", "choice-desc");
+                                    var optTxt = Quiz.wrap(this.nameGetter(opt), "div", "choice-name");
 
-                        txt += Quiz.wrap(optTxt, "li", "choice");
-                    });
+                                    if (this.descGetter)
+                                        optTxt += Quiz.wrap(this.descGetter(opt), "div", "choice-desc");
 
-                    return Quiz.wrap(txt, "ul", "choices");
-                }
-            }
+                                    txt += Quiz.wrap(optTxt, "li", "choice");
+                                });
+
+                                return Quiz.wrap(txt, "ul", "choices");
+                            }
+
+                        }
+                        */
         }
 
         withOptions(opts: Array<T>): ChoiceQuestion<T> {
@@ -60,11 +64,6 @@ module TerminalQuiz {
             return this;
         }
 
-        private getSingleItemName() {
-
-            return Quiz.getStringFromStringGetter(this.singleItemNameGetter);
-        }
-
         optionName(nameGetter: (opt: T) => string): ChoiceQuestion<T> {
 
             this.nameGetter = nameGetter;
@@ -72,22 +71,19 @@ module TerminalQuiz {
             return this;
         }
 
-        optionDescription(descGetter: (opt: T) => string): ChoiceQuestion<T>{
+        optionDescription(descGetter: (opt: T) => string): ChoiceQuestion<T> {
 
             this.descGetter = descGetter;
 
             return this;
         }
 
-        withText(text: string | (() => string)): ChoiceQuestion<T> {
-
-            return <ChoiceQuestion<T>>super.withText(text);
-        }
- 
+        /*
         onAnswer(callback: (selectedOption: T) => void): ChoiceQuestion<T> {
 
-            return <ChoiceQuestion<T>>super.onAnswer(callback);
+            return <ChoiceQuestion<T>>super.onUserCommand(callback);
         }
+        */
 
         _getCompletionCallback(): TerminalQuiz.Autocomplete {
 
@@ -101,9 +97,10 @@ module TerminalQuiz {
             }
         }
 
-        _parseAnswer(answer: any): IQuestionParseResult {
+        parseUserAnswer(answer: any): IQuestionParseResult {
 
-            var result = super._parseAnswer(answer);
+            /*
+            var result = super.parseUserAnswer(answer);
 
             if (result.isValid) {
 
@@ -125,6 +122,9 @@ module TerminalQuiz {
             }
 
             return result;
+            */
+
+            return null;
         }
     }
 }

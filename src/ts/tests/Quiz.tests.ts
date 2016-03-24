@@ -57,7 +57,7 @@ describe("Quiz", function() {
 
             beforeEach(() => {
 
-                dummyQuestion = new DummyQuestion("The sample question.", quiz);
+                dummyQuestion = new DummyQuestion("The sample question.").withTitle("Title");
 
                 quiz.addQuestion(dummyQuestion);
             });
@@ -67,6 +67,15 @@ describe("Quiz", function() {
                 quiz.start();
 
                 expect(quiz.getCurrentQuestion()).toBe(dummyQuestion);
+            });
+
+            it("should ask the current question", function() {
+
+                spyOn(quiz, 'askCurrentQuestion');
+
+                quiz.start();
+
+                expect(quiz.askCurrentQuestion).toHaveBeenCalled();
             });
 
             it("should set the quiz as started", function() {
@@ -103,20 +112,36 @@ describe("Quiz", function() {
             }).toThrowError("Cannot go to the next question because the quiz did not start yet! Did you call the start method?")
         });
 
-        describe("it started", function() {
+        describe("it did start", function() {
 
             var dummy1: TerminalQuiz.Question = null;
             var dummy2: TerminalQuiz.Question = null;
 
             beforeEach(() => {
 
-                dummy1 = quiz.addQuestion(new DummyQuestion("Dummy1", quiz));
-                dummy2 = quiz.addQuestion(new DummyQuestion("Dummy2", quiz));
+                dummy1 = quiz.addQuestion(new DummyQuestion("Dummy1")).withTitle("Title");
+                dummy2 = quiz.addQuestion(new DummyQuestion("Dummy2")).withTitle("Title");
 
                 quiz.start();
             });
 
-            describe("it's not last question", () => {
+            describe("it's not last question and current question is valid", () => {
+
+                beforeEach(() => {
+
+                    spyOn(quiz, 'validateCurrentAnswer').and.returnValue(true);
+
+                    quiz.start();
+                });
+
+                it("should ask the next question", function() {
+
+                    spyOn(quiz, 'askCurrentQuestion');
+
+                    quiz.goToNextQuestion();
+
+                    expect(quiz.askCurrentQuestion).toHaveBeenCalled();
+                });
 
                 it("should move to the next question", function() {
 
@@ -124,18 +149,33 @@ describe("Quiz", function() {
 
                     expect(quiz.getCurrentQuestion()).toBe(dummy2);
                 });
-
-                it("should return true", function() {
-
-                    expect(quiz.goToNextQuestion()).toBe(true);
-                });
             })
 
-            describe("it's last question", () => {
+            describe("it's not last question and current question is not valid", () => {
+
+                beforeEach(() => {
+
+                    spyOn(quiz, 'validateCurrentAnswer').and.returnValue(false);
+
+                    quiz.start();
+                });
+
+                it("should not ask the next question", function() {
+
+                    spyOn(quiz, 'askCurrentQuestion');
+
+                    quiz.goToNextQuestion();
+
+                    expect(quiz.askCurrentQuestion).not.toHaveBeenCalled();
+                });
+            });
+
+            describe("it's the last question", () => {
 
                 beforeEach(() => {
 
                     spyOn(quiz, 'end');
+                    spyOn(quiz, 'validateCurrentAnswer').and.returnValue(true);
 
                     quiz.goToNextQuestion();
                     quiz.goToNextQuestion();
@@ -146,23 +186,71 @@ describe("Quiz", function() {
                     expect(quiz.getCurrentQuestion()).toBe(dummy2);
                 });
 
-                it("should return false", function() {
+                it("should not ask the next question", function() {
 
-                    expect(quiz.end).toHaveBeenCalled();
+                    spyOn(quiz, 'askCurrentQuestion');
+
+                    quiz.goToNextQuestion();
+
+                    expect(quiz.askCurrentQuestion).not.toHaveBeenCalled();
                 });
             })
         });
+    });
 
-        it("it started and is last question move to next question", function() {
+    describe("validateCurrentAnswer", () => {
 
-            var dummy1 = quiz.addQuestion(new DummyQuestion("Dummy1", quiz));
-            var dummy2 = quiz.addQuestion(new DummyQuestion("Dummy2", quiz));
+        describe("has current question", () => {
 
+            var question: TerminalQuiz.Question = null;
+            var answer: TerminalQuiz.QuestionAnswer = null;
+            var processor: TerminalQuiz.QuestionProcessor = null;
+
+            beforeEach(() => {
+
+                question = new DummyQuestion("Dummy1");
+                answer = new TerminalQuiz.QuestionAnswer();
+                processor = new TerminalQuiz.QuestionProcessor(question);
+
+                spyOn(quiz, 'getCurrentQuestion').and.returnValue(question);
+                spyOn(quiz, 'getAnswer').and.returnValue(answer);
+                spyOn(question, 'getProcessor').and.returnValue(processor);
+            });
+
+            it("question processor does not raise errors returns true", () => {
+
+                spyOn(processor, 'validateAnswer').and.callFake((answer, messenger) => {
+
+                });
+
+                expect(quiz.validateCurrentAnswer()).toBe(true);
+                expect(quiz.getAnswer).toHaveBeenCalledWith(question);
+            });
+
+            it("question processor does raise errors", () => {
+
+                spyOn(quiz, 'echoFail');
+
+                spyOn(processor, 'validateAnswer').and.callFake((answer, messenger) => {
+
+                    (<TerminalQuiz.IMessenger>messenger).echoFail("someFailure");
+                });
+
+                expect(quiz.validateCurrentAnswer()).toBe(false);
+                expect(quiz.getAnswer).toHaveBeenCalledWith(question);
+            });
+        });
+    });
+
+    describe("askCurrentQuestion", () => {
+
+        var dummyQuestion: DummyQuestion = null;
+
+        beforeEach(() => {
+
+            quiz.initialize();
+            dummyQuestion = quiz.addQuestion(new DummyQuestion("Dummy1").withTitle("Title"));
             quiz.start();
-
-            quiz.goToNextQuestion();
-
-            expect(quiz.getCurrentQuestion()).toBe(dummy2);
         });
     });
 });

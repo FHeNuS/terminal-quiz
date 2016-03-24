@@ -11,126 +11,198 @@ module TerminalQuiz {
 
     export abstract class Question {
 
-        constructor(public name: string, protected quiz: Quiz) {
+        constructor(protected name: string) {
         }
 
         public initialize(): void {
+
+            if (!this.title || !this.title()) {
+
+                throw new Error(`The question named '${this.name}' does not define a title!`);
+            }
+
+            if (!this.required) {
+
+                // If the required callback is not defined, set as not required
+                this.required = () => false;
+            }
+
+            if (!this.ifCallback) {
+
+                // If the if callback is not defined, set as it should execute
+                this.ifCallback = () => true;
+            }
+
+            if (!this.description) {
+
+                this.description = () => null;
+            }
+
+            if (!this.getProcessor()) {
+
+                this.withProcessor(new QuestionProcessor(this));
+            }
         }
 
-        protected regex: RegExp;
+        private processor: QuestionProcessor;
 
-        protected friendlyRegex: string;
+        private description: (() => HTMLElement);
 
-        protected description: string | (() => string);
+        private title: (() => HTMLElement);
 
-        protected text: string | (() => string);
+        private whenAnsweredCallback: (answer: any) => void;
 
-        protected onAnswerCb: (answer: any) => void;
+        private required: () => boolean;
 
-        protected required: () => boolean;
+        private ifCallback: () => boolean;
 
-        protected ifCallback: () => boolean;
+        /*
+                public _getParsedFullText(): string {
 
-        public _getParsedText(): string {
+                    var text = Quiz.wrapText(this._getParsedText(), "question-text");
 
-            return Quiz.getStringFromStringGetter(this.text);
-        }
+                    var description = Quiz.wrapText(this._getParsedDescription(), "question-description");
 
-        /**
-        Returns the callback (if any) responsible for this questions autocomplete.
-        @return Autocomplete callback.
+                    return Quiz.wrapText(text + description, "question", this.constructor.toString().match(/\w+/g)[1], this.name);
+                }
         */
-        public _getCompletionCallback(): TerminalQuiz.Autocomplete {
 
-            return null;
-        }
+        private createContainer(name: String, content: any): () => HTMLElement {
 
-        public _getParsedDescription(): string {
+            return () => {
 
-            return Quiz.getStringFromStringGetter(this.description);
-        }
+                var container = $(`<div class="${name}">`);
 
-        public _getParsedFullText(): string {
+                if (typeof (content) === "string") {
 
-            var text = Quiz.wrapText(this._getParsedText(), "question-text");
-
-            var description = Quiz.wrapText(this._getParsedDescription(), "question-description");
-
-            return Quiz.wrapText(text + description, "question", this.constructor.toString().match(/\w+/g)[1], this.name);
-        }
-
-        public _parseAnswer(answer: string): IQuestionParseResult {
-
-            var result = <IQuestionParseResult>{};
-            result.isValid = false;
-
-            var hasAnswer = (answer && answer.length > 0);
-
-            if (!hasAnswer && this.required && this.required()) {
-
-                this.quiz.echoFail("Please supply a value!");
-
-            } else {
-
-                if (hasAnswer && this.regex && !this.regex.test(answer)) {
-
-                    this.quiz.echoFail("Supplied value does not respect pattern: " + this.friendlyRegex);
+                    container.append(<string>content);
 
                 } else {
 
-                    result.isValid = true;
-                    result.parsedAnswer = answer;
+                    container.append((<() => any>content)());
                 }
+
+                return container.get(0);
             }
-
-            return result;
         }
 
-        if(ifCallBack: () => boolean): Question {
+        withTitle(title: string): this
+        withTitle(title: () => string): this
+        withTitle(title: () => HTMLElement): this
+        withTitle(title: string | (() => string) | (() => HTMLElement)): this {
 
-            this.ifCallback = ifCallBack;
+            this.title = this.createContainer("title", title);
 
             return this;
         }
 
-        withText(text: string | (() => string)): Question {
+        withDescription(description: string): this
+        withDescription(description: () => string): this
+        withDescription(description: () => HTMLElement): this
+        withDescription(description: string | (() => string) | (() => HTMLElement)): this {
 
-            this.text = text;
-
-            return this;
-        }
-
-        withPattern(regex: RegExp, friendlyRegex: string): TextQuestion {
-
-            this.regex = regex;
-            this.friendlyRegex = friendlyRegex;
+            this.description = this.createContainer("description", description);
 
             return this;
         }
 
-        asRequired(required?: () => boolean): Question {
+        getDescription(): () => HTMLElement {
+
+            return this.description;
+        }
+
+        getIfCallback(): () => boolean {
+
+            return this.ifCallback;
+        }
+
+        getName(): string {
+
+            return this.name;
+        }
+
+        getProcessor(): QuestionProcessor {
+
+            return this.processor;
+        }
+
+        getRequired(): () => boolean {
+
+            return this.required;
+        }
+
+        getTitle(): () => HTMLElement {
+
+            return this.title;
+        }
+
+        getWhenAnsweredCallback(): (answer: any) => void {
+
+            return this.whenAnsweredCallback;
+        }
+
+        /**
+        Sets the question as required.
+        */
+        asRequired(): this
+        /**
+        Sets the question as required or not.
+        @param required Value indicating if the question is required or not.
+        */
+        asRequired(required: boolean): this
+        /**
+        Sets the question as required or not.
+        @param required Callback that will indicate if the question is required or not.
+        */
+        asRequired(required: () => boolean): this
+        /**
+        Sets the question as required or not.
+        @param required A boolean value or a callback that will indicate if the question is required or not.
+        */
+        asRequired(required?: boolean | (() => boolean)): this {
 
             if (required === undefined) {
 
                 // If no arguments are supplied, it should be required
-                required = () => true;
+                this.required = () => true;
+
+            } else {
+
+                if (typeof required === "boolean") {
+
+                    this.required = () => <boolean>required;
+
+                } else {
+
+                    this.required = (<() => boolean>required);
+                }
             }
 
-            this.required = required;
+            return this;
+        }
+
+        onlyAskIf(callback: () => boolean): this {
+
+            this.ifCallback = callback;
 
             return this;
         }
 
-        onAnswer(callback: (answer: any) => void): Question {
+        whenAnswered(callback: (answer: any) => void): this {
 
-            this.onAnswerCb = callback;
+            this.whenAnsweredCallback = callback;
 
             return this;
         }
 
-        shouldBeAsked(): boolean {
+        /**
+        Sets the question processor.
+        */
+        withProcessor(processor: QuestionProcessor): this {
 
-            return (this.ifCallback) ? this.ifCallback() : true;
+            this.processor = processor;
+
+            return this;
         }
     }
 }
