@@ -25,7 +25,7 @@
         }
     }
 
-    export class TextQuestionProcessor extends QuestionProcessor {
+    export class TextQuestionProcessor extends QuestionProcessor<TextQuestion> {
 
         getDetail(): HTMLElement {
 

@@ -24,6 +24,7 @@
         "src/ts/lib/QuestionAnswer.ts",
         "src/ts/lib/QuestionProcessor.ts",
         "src/ts/lib/Quiz.ts",
+        "src/ts/lib/QuizSounds.ts",
         "src/ts/lib/TextBuilder.ts",
         "src/ts/lib/TextQuestion.ts",
         "src/ts/tests/Question.tests.ts",

@@ -1,11 +1,13 @@
 module TerminalQuiz {
 
-    export class Quiz {
+    export interface QuizContext {
 
-        public static WRONG_AUDIO_NAME = "WrongAudio";
-        public static RIGHT_AUDIO_NAME = "RightAudio";
-        public static BACKGROUND_AUDIO_NAME = "BackgroundAudio";
-        public static TYPING_AUDIO_NAME = "TypingAudio";
+        getAnswer(): string;
+
+        setAnswer(answer: string);
+    }
+
+    export class Quiz {
 
         static CMD_SEPARATOR = " ";
 
@@ -16,14 +18,15 @@ module TerminalQuiz {
         private currentQuestionIdx: number;
         private started = false;
         private term: any;
-
+        private i: QuizContext;
         private questions = new Array<Question>();
         private answers: {
             [name: string]: QuestionAnswer
         } = {};
         private anim: boolean = false;
         private greetings: String | (() => string);
-
+        private ctx: QuizContext;
+        
         private separateTextFromElements(elem: Node, bag: any) {
 
             if (elem.hasChildNodes) {
@@ -72,7 +75,7 @@ module TerminalQuiz {
 
                                 processed = true;
 
-                                this.playAudio(Quiz.TYPING_AUDIO_NAME, true);
+                                this.playAudio(QuizSounds.Type, true);
 
                                 // Clears dummy element created
                                 container.empty();
@@ -109,7 +112,7 @@ module TerminalQuiz {
                                             // execute in next interval
                                             setTimeout(() => {
 
-                                                this.stopAudio(Quiz.TYPING_AUDIO_NAME);
+                                                this.stopAudio(QuizSounds.Type);
 
                                                 // swap command with prompt
                                                 this.anim = false;
@@ -151,9 +154,13 @@ module TerminalQuiz {
             this.greetings = msg;
         }
 
-        addQuestion(question: Question): Question {
+        addQuestion<T extends Question>(question: T): T {
+
+            if (!!this.answers[question.getName()])
+                throw new Error(`Cannot add a question named '${question.getName()}' twice!`);
 
             this.questions.push(question);
+            this.answers[question.getName()] = new QuestionAnswer();
 
             return question;
         }
@@ -161,13 +168,13 @@ module TerminalQuiz {
         echoFail(msg: string): void {
 
             this.echo($(`<div class="echo-fail">${msg}</div>`).get(0));
-            this.playAudio(Quiz.WRONG_AUDIO_NAME);
+            this.playAudio(QuizSounds.WrongAnswer);
         }
 
         echoSuccess(msg: string) {
 
             this.echo($(`<div class="echo-success">${msg}</div>`).get(0));
-            this.playAudio(Quiz.RIGHT_AUDIO_NAME);
+            this.playAudio(QuizSounds.RightAnswer);
         }
 
         /*
@@ -200,26 +207,33 @@ module TerminalQuiz {
             return <ChoiceQuestion<T>>this.addQuestion(new ChoiceQuestion<T>(name, this));
         }
         */
-        public end() {
 
-            this.stopAudio(Quiz.BACKGROUND_AUDIO_NAME);
+        public clear(): void {
 
             this.term.clear();
             this.term.set_prompt("> ");
+        }
 
-            this.opts.onEnd();
+        public end() {
+
+            if (!this.term)
+                throw new Error("Cannot end the quiz because it did not initialize!");
+
+            if (!this.started)
+                throw new Error("Cannot end the quiz because it did not start!");
+
+            this.stopAudio(QuizSounds.Background);
+
+            this.clear();
+
+            this.started = false;
+
+            this.onEnd();
         }
 
         getAnswer(question: Question): QuestionAnswer {
 
-            var answer = this.answers[question.getName()];
-
-            if (!answer) {
-
-                answer = this.answers[question.getName()] = new QuestionAnswer();
-            }
-
-            return answer;
+            return this.answers[question.getName()];
         }
 
         onUserCommand(cmd): void {
@@ -235,6 +249,11 @@ module TerminalQuiz {
             }
         }
 
+        onKeyPress(event: KeyboardEvent): boolean {
+
+            return this.getCurrentQuestion().getProcessor().onKeyPress(event.keyCode, this.ctx);
+        }
+
         validateCurrentAnswer(): boolean {
 
             var isValid = false;
@@ -247,7 +266,7 @@ module TerminalQuiz {
                 // By default is valid
                 answer.isValid = true;
 
-                question.getProcessor().validateAnswer(answer.userAnswer, {
+                question.getProcessor().validateAnswer(answer.parsedAnswer, {
 
                     echoFail: (msg) => {
 
@@ -289,8 +308,12 @@ module TerminalQuiz {
                         //disable keyboard when animating
                         if (this.anim) {
                             return false;
+                        } else {
+                            if (!this.onKeyPress(e))
+                                return false;
                         }
                     },
+
                     greetings: (cb) => {
 
                         cb('');
@@ -298,6 +321,18 @@ module TerminalQuiz {
                     completion: true,
                     checkArity: false
                 });
+
+            this.ctx = {
+
+                getAnswer: () => {
+
+                    return this.term.get_command();
+                },
+                setAnswer: (answer: string) => {
+
+                    this.term.set_command(answer);
+                }
+            }
         }
 
         /**
@@ -311,7 +346,7 @@ module TerminalQuiz {
 
             this.currentQuestionIdx = 0;
 
-            this.playAudio(Quiz.BACKGROUND_AUDIO_NAME, true);
+            this.playAudio(QuizSounds.Background, true);
 
             this.started = true;
 
@@ -336,7 +371,7 @@ module TerminalQuiz {
             if (question) {
 
                 this.term.clear();
-                
+
                 question.initialize();
 
                 var questionElem = $(`<div class="${question.constructor.toString().match(/\w+/g)[1]}"></div>`);
@@ -399,11 +434,16 @@ module TerminalQuiz {
             }
         }
 
-        private playAudio(name: string, loop = false) {
+        private onEnd() {
+
 
         }
 
-        private stopAudio(name: string) {
+        private playAudio(sound: QuizSounds, loop = false) {
+
+        }
+
+        private stopAudio(sound: QuizSounds) {
 
         }
     }

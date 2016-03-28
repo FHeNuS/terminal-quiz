@@ -1,8 +1,8 @@
 module TerminalQuiz {
 
-    export class QuestionProcessor {
+    export class QuestionProcessor<T extends Question> {
 
-        constructor(public question: Question) {
+        constructor(public question: T) {
 
         }
 
@@ -44,6 +44,13 @@ module TerminalQuiz {
 
                 messenger.echoFail('Please provide an answer for this question!');
             }
+        }
+
+        public onKeyPress(typedCharacter: number, ctx: QuizContext) : boolean {
+
+            console.log(typedCharacter);
+
+            return true;
         }
     }
 }

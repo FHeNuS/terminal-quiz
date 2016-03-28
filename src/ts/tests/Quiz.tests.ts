@@ -40,7 +40,7 @@ describe("Quiz", function() {
         describe("duplicated question name", () => {
 
             it("should throw an Error", () => {
-                
+
                 quiz.addQuestion(new DummyQuestion("sameName"));
 
                 expect(() => {
@@ -108,7 +108,7 @@ describe("Quiz", function() {
 
                 quiz.start();
 
-                expect(quiz["playAudio"]).toHaveBeenCalledWith(TerminalQuiz.Quiz.BACKGROUND_AUDIO_NAME, true);
+                expect(quiz["playAudio"]).toHaveBeenCalledWith(TerminalQuiz.QuizSounds.Background, true);
             });
         });
     });
@@ -221,7 +221,7 @@ describe("Quiz", function() {
 
             var question: TerminalQuiz.Question = null;
             var answer: TerminalQuiz.QuestionAnswer = null;
-            var processor: TerminalQuiz.QuestionProcessor = null;
+            var processor: TerminalQuiz.QuestionProcessor<any> = null;
 
             beforeEach(() => {
 
@@ -259,15 +259,76 @@ describe("Quiz", function() {
         });
     });
 
-    describe("askCurrentQuestion", () => {
+    describe("end", () => {
 
-        var dummyQuestion: DummyQuestion = null;
+        describe("quiz has started", () => {
 
-        beforeEach(() => {
+            beforeEach(() => {
 
-            quiz.initialize();
-            dummyQuestion = quiz.addQuestion(new DummyQuestion("Dummy1").withTitle("Title"));
-            quiz.start();
+                quiz.initialize();
+                quiz.addQuestion(new DummyQuestion("Dummy").withTitle("Title"));
+                quiz.start();
+            });
+
+            it("should stop the background audio", function() {
+
+                spyOn(quiz, 'clear');
+
+                quiz.end();
+
+                expect(quiz.clear).toHaveBeenCalled();
+            });
+
+            it("should stop the background audio", function() {
+
+                spyOn(quiz, 'stopAudio');
+
+                quiz.end();
+
+                expect(quiz["stopAudio"]).toHaveBeenCalledWith(TerminalQuiz.QuizSounds.Background);
+            });
+
+            it("should notify end event listeners", function() {
+
+                spyOn(quiz, 'onEnd');
+
+                quiz.end();
+
+                expect(quiz["onEnd"]).toHaveBeenCalled();
+            });
+
+            it("should mark the test as not started", function() {
+
+                quiz.end();
+
+                expect(quiz.hasStarted()).toBe(false);
+            });
+        });
+
+        describe("quiz did not initialize", () => {
+
+            it("should throw an error", () => {
+
+                expect(() => {
+
+                    quiz.end();
+
+                }).toThrowError("Cannot end the quiz because it did not initialize!");
+            })
+        });
+
+        describe("quiz did not start", () => {
+
+            it("should throw an error", () => {
+
+                expect(() => {
+
+                    quiz.initialize();
+
+                    quiz.end();
+
+                }).toThrowError("Cannot end the quiz because it did not start!");
+            })
         });
     });
 });

@@ -3,6 +3,14 @@
         <!-- bower:css -->
         <link rel="stylesheet" href="../../../bower_components/jquery.terminal/css/jquery.terminal.css" />
         <!-- endbower -->
+        <style>
+          .choices .choice.selected .cursor:before {
+            content: '\00a0 \00a0-->\00a0 \00a0'
+          }
+          .choices .choice.selected {
+            font-weight: bold;
+          }
+        </style>
     </head>
     <body>
         <div id="container" style="border: 1px solid; width:200px;height:200px;"></div>
@@ -12,11 +20,13 @@
         <script src="../../../bower_components/jquery.terminal/js/jquery.mousewheel-min.js"></script>
         <script src="../../../bower_components/jasmine-core/lib/jasmine-core/jasmine.js"></script>
         <!-- endbower -->
+        <script type="text/javascript" src="../../../build/js/lib/QuizSounds.js"></script>
         <script type="text/javascript" src="../../../build/js/lib/Quiz.js"></script>
         <script type="text/javascript" src="../../../build/js/lib/Question.js"></script>
         <script type="text/javascript" src="../../../build/js/lib/QuestionProcessor.js"></script>
         <script type="text/javascript" src="../../../build/js/lib/QuestionAnswer.js"></script>
         <script type="text/javascript" src="../../../build/js/lib/TextQuestion.js"></script>
+        <script type="text/javascript" src="../../../build/js/lib/ChoiceQuestion.js"></script>
         <script type="text/javascript">
 
             var quiz = new TerminalQuiz.Quiz($("#container").get(0), {
@@ -26,7 +36,8 @@
 
             quiz.initialize();
 
-            quiz.addQuestion(new TerminalQuiz.TextQuestion("SampleQuestion").withTitle("A question?").asRequired());
+            quiz.addQuestion(new TerminalQuiz.ChoiceQuestion("SampleQuestion").withTitle("A question?").withOpts(["First Choice", "Second Choice"]).asRequired());
+
             quiz.addQuestion(new TerminalQuiz.TextQuestion("SampleQuestion2").withTitle("Another question?").asRequired());
 
             quiz.start();

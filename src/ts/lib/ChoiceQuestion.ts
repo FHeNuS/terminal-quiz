@@ -1,130 +1,186 @@
 module TerminalQuiz {
 
-    export enum ChoiceQuestionMode {
+    export class ChoiceQuestionProcessor extends QuestionProcessor<ChoiceQuestion<any>> {
 
-        ID_LABEL,
+        private container: JQuery;
+        private selectedIdx: number;
 
-        ID,
+        getDetail(): HTMLElement {
 
-        LABEL,
+            this.container = $('<ol class="choices"></ul>"');
+
+            this.question.getOpts().forEach((opt) => {
+
+                this.container.append(`<li class="choice"><span class="cursor"></span><span class="name">${this.question.getOptsName()(opt)}</span></li>`)
+            });
+
+            return this.container.get(0);
+        }
+
+        private getUserAnswerIdx(userAnswer: string): number {
+
+            var answerIdx = -1;
+
+            // The user answer should be a index with the selected choice
+            var parsedValue = parseInt(userAnswer);
+
+            if (parsedValue > 0 && parsedValue <= this.question.getOpts().length) {
+
+                // Decrements one from the answer because array indexes are zero-based and the answers are one-based
+                answerIdx = parsedValue - 1;
+            }
+
+            return answerIdx;
+        }
+
+        public parseUserAnswer(userAnswer: string): any {
+
+            var answerIdx = this.getUserAnswerIdx(userAnswer);
+
+            return (answerIdx != -1) ? this.question.getOpts()[answerIdx] : null;
+        }
+
+        public validateAnswer(parsedAnswer: any, messenger: IMessenger): void {
+
+            if (!parsedAnswer) {
+
+                messenger.echoFail("Please select a valid choice number!");
+            }
+        }
+
+        private clearSelectedChoice(): void {
+
+            // Removes the selected class from all the choices before processing
+            this.container.children().each((idx, choice) => {
+
+                $(choice).removeClass("selected");
+            });
+        }
+
+        private displaySelectedChoice(): void {
+
+            this.clearSelectedChoice();
+
+            // Highlight the typed answer
+            this.container.children().eq(this.selectedIdx).addClass("selected");
+        }
+
+        public onKeyPress(typedKey: number,  ctx: QuizContext): boolean {
+
+            console.log(typedKey);
+
+            var validKey = false;
+
+            if (typedKey == 8) {
+
+                // BACKSPACE
+                validKey = true;
+
+                if (ctx.getAnswer().length == 1) {
+
+                    // If is erasing the last character, should clear the selected choice
+                    this.clearSelectedChoice();
+                }
+
+            } else if (typedKey == 38) {
+
+                // UP ARROW
+                if (this.selectedIdx > 0) {
+
+                    this.selectedIdx--;
+
+                } else {
+
+                    this.selectedIdx = this.question.getOpts().length - 1;
+                }
+
+                ctx.setAnswer("" + (this.selectedIdx + 1));
+
+                this.displaySelectedChoice();
+
+            } else if (typedKey == 40) {
+
+                // DOWN ARROR
+                if (this.selectedIdx < (this.question.getOpts().length - 1)) {
+
+                    this.selectedIdx++;
+
+                } else {
+
+                    this.selectedIdx = 0;
+                }
+
+                ctx.setAnswer("" + (this.selectedIdx + 1));
+                
+                this.displaySelectedChoice();
+
+            } else {
+
+                var typedChar = String.fromCharCode(typedKey);
+
+                if (/^\d$/.test(typedChar)) {
+
+                    var answerIdx = this.getUserAnswerIdx(ctx.getAnswer() + typedChar);
+
+                    if (answerIdx > -1) {
+
+                        this.selectedIdx = answerIdx;
+
+                        this.displaySelectedChoice();
+
+                        // If its a digit between the valid choices, returns as valid
+                        validKey = true;
+                    }
+                }
+            }
+
+            return validKey;
+        }
     }
 
     export class ChoiceQuestion<T> extends Question {
 
         private opts: Array<T>;
         private nameGetter: (item: T) => string;
-        private descGetter: (item: T) => string;
-        private singleItemNameGetter: string | (() => string);
 
         initialize(): void {
 
-            super.initialize();
+            if (!this.getProcessor()) {
 
-            if (!this.singleItemNameGetter) {
-
-                this.singleItemNameGetter = this.name;
+                this.withProcessor(new ChoiceQuestionProcessor(this));
             }
 
-            /*
-                        if (!this.description) {
+            super.initialize();
 
+            if (!this.nameGetter) {
 
-                            this.detail = () => {
-
-                                var txt = "";
-
-                                this.opts.forEach((opt) => {
-
-                                    var optTxt = Quiz.wrap(this.nameGetter(opt), "div", "choice-name");
-
-                                    if (this.descGetter)
-                                        optTxt += Quiz.wrap(this.descGetter(opt), "div", "choice-desc");
-
-                                    txt += Quiz.wrap(optTxt, "li", "choice");
-                                });
-
-                                return Quiz.wrap(txt, "ul", "choices");
-                            }
-
-                        }
-                        */
+                // If the name getter is not defined, creates one that returns the option itself
+                this.nameGetter = (opt) => opt.toString();
+            }
         }
 
-        withOptions(opts: Array<T>): ChoiceQuestion<T> {
+        getOpts(): Array<T> {
+
+            return this.opts;
+        }
+
+        getOptsName(): (opt: T) => string {
+
+            return this.nameGetter;
+        }
+
+        withOpts(opts: Array<T>): ChoiceQuestion<T> {
 
             this.opts = opts;
 
             return this;
         }
 
-        singleItemName(singleItemNameGetter: string | (() => string)): ChoiceQuestion<T> {
-
-            this.singleItemNameGetter = singleItemNameGetter;
-
-            return this;
-        }
-
-        optionName(nameGetter: (opt: T) => string): ChoiceQuestion<T> {
+        withOptsName(nameGetter: (opt: T) => string): ChoiceQuestion<T> {
 
             this.nameGetter = nameGetter;
 
             return this;
-        }
-
-        optionDescription(descGetter: (opt: T) => string): ChoiceQuestion<T> {
-
-            this.descGetter = descGetter;
-
-            return this;
-        }
-
-        /*
-        onAnswer(callback: (selectedOption: T) => void): ChoiceQuestion<T> {
-
-            return <ChoiceQuestion<T>>super.onUserCommand(callback);
-        }
-        */
-
-        _getCompletionCallback(): TerminalQuiz.Autocomplete {
-
-            return (answer, callback) => {
-
-                callback(this.opts.map((item) => {
-
-                    return this.nameGetter(item);
-
-                }));
-            }
-        }
-
-        parseUserAnswer(answer: any): IQuestionParseResult {
-
-            /*
-            var result = super.parseUserAnswer(answer);
-
-            if (result.isValid) {
-
-                var answers = this.opts.filter(item => {
-
-                    return this.nameGetter(item) == answer;
-                });
-
-                if (answers.length == 1) {
-
-                    result.isValid = true;
-                    result.parsedAnswer = answers[0];
-
-                } else {
-
-                    result.isValid = false;
-                    this.quiz.echoFail("Invalid choice of " + this.getSingleItemName() + "!");
-                }
-            }
-
-            return result;
-            */
-
-            return null;
         }
     }
 }

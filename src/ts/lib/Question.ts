@@ -44,7 +44,7 @@ module TerminalQuiz {
             }
         }
 
-        private processor: QuestionProcessor;
+        private processor: QuestionProcessor<any>;
 
         private description: (() => HTMLElement);
 
@@ -121,7 +121,7 @@ module TerminalQuiz {
             return this.name;
         }
 
-        getProcessor(): QuestionProcessor {
+        getProcessor(): QuestionProcessor<this> {
 
             return this.processor;
         }
@@ -198,7 +198,7 @@ module TerminalQuiz {
         /**
         Sets the question processor.
         */
-        withProcessor(processor: QuestionProcessor): this {
+        withProcessor(processor: QuestionProcessor<any>): this {
 
             this.processor = processor;
 
