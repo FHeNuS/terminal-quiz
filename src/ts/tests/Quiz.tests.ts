@@ -235,13 +235,13 @@ describe("Quiz", function() {
         describe("has current question", () => {
 
             var question: TerminalQuiz.Question = null;
-            var answer: TerminalQuiz.QuestionAnswer = null;
+            var answer: TerminalQuiz.Answer = null;
             var processor: TerminalQuiz.QuestionProcessor<any> = null;
 
             beforeEach(() => {
 
                 question = new DummyQuestion("Dummy1");
-                answer = new TerminalQuiz.QuestionAnswer();
+                answer = new TerminalQuiz.Answer();
                 processor = new TerminalQuiz.QuestionProcessor(question);
                 quiz.initialize();
 

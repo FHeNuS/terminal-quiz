@@ -19,22 +19,38 @@ var testFiles = ['tests/**/*.ts', 'typings/**/*.d.ts', 'build/**/*.d.ts'];
 
 gulp.task('build-script', function () {
 
-    var tsResult = gulp.src(scriptFiles)
-                       .pipe($.sourcemaps.init()) // This means sourcemaps will be generated
-                       .pipe($.typescript({
-                           declaration: true,
-                           out: 'terminal-quiz.js'
-                        //    sortOutput: true,
-                           // ...
-                       }));
+  var ts = $.typescript;
+  var concat = $.concat;
+  var sourcemaps = $.sourcemaps;
+  var merge = require('merge2');
 
-    return $.merge2([
+  var tsProject = ts.createProject('tsconfig.json');
+
+  var tsResult = gulp.src([
+    'src/ts/lib/Autocomplete.ts',
+    'src/ts/lib/IQuizOptions.ts',
+    'src/ts/lib/QuizSounds.ts',
+    'src/ts/lib/QuizAudioManager.ts',
+    'src/ts/lib/Quiz.ts',
+    'src/ts/lib/Question.ts',
+    'src/ts/lib/QuestionProcessor.ts',
+    'src/ts/lib/Answer.ts',
+    'src/ts/lib/TextQuestion.ts',
+    'src/ts/lib/ChoiceQuestion.ts',
+    'typings/tsd.d.ts'])
+                         .pipe(sourcemaps.init()) // This means sourcemaps will be generated
+                         .pipe($.typescript(tsProject, {
+                             sortOutput: true,
+                         }));
+
+    return merge([
         tsResult.dts
-        // .pipe($.concat('terminal-quiz.d.ts'))
-        .pipe(gulp.dest('build/ts')),
+          .pipe(concat('terminal-quiz.d.ts'))
+          .pipe(gulp.dest('build/ts')),
         tsResult.js
-        // .pipe($.concat('terminal-quiz.js'))
-        .pipe(gulp.dest('build/js'))
+          .pipe(concat('terminal-quiz.js')) // You can use other plugins that also support gulp-sourcemaps
+          .pipe(sourcemaps.write()) // Now the sourcemaps are added to the .js file
+          .pipe(gulp.dest('build/js'))
     ]);
 });
 

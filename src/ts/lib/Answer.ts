@@ -1,6 +1,6 @@
 module TerminalQuiz {
 
-    export class QuestionAnswer {
+    export class Answer {
 
         parsedAnswer: any;
 

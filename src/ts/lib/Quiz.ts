@@ -27,7 +27,7 @@ module TerminalQuiz {
         private term: any;
         private questions = new Array<Question>();
         private answers: {
-            [name: string]: QuestionAnswer
+            [name: string]: Answer
         } = {};
         private anim: boolean = false;
         private greetings: String | (() => string);
@@ -158,22 +158,26 @@ module TerminalQuiz {
             });
         }
 
-        setGreetings(msg: string | (() => string)): void {
-
-            this.greetings = msg;
-        }
-
+        /**
+        Add the supplied question to this Quiz.
+        @param question The question to add.
+        @returns The added question, for chanining purposes.
+        */
         addQuestion<T extends Question>(question: T): T {
 
             if (!!this.answers[question.getName()])
                 throw new Error(`Cannot add a question named '${question.getName()}' twice!`);
 
             this.questions.push(question);
-            this.answers[question.getName()] = new QuestionAnswer();
+            this.answers[question.getName()] = new Answer();
 
             return question;
         }
 
+        /**
+        Writes an error message and marks the current question (if there is) as not valid.
+        @param msg Message to write.
+        */
         echoFail(msg: string): void {
 
             this.echo($(`<div class="echo-fail">${msg}</div>`).get(0));
@@ -191,49 +195,28 @@ module TerminalQuiz {
             }
         }
 
+        /**
+        Writes a success message.
+        @param msg Message to write.
+        */
         echoSuccess(msg: string) {
 
             this.echo($(`<div class="echo-success">${msg}</div>`).get(0));
             this.playAudio(QuizSounds.RightAnswer);
         }
 
-        /*
-        addTextQuestion(name: string): TextQuestion {
-
-            return <TextQuestion>this.addQuestion(new TextQuestion(name, this));
-        }
-
-        addListQuestion<T extends Question>(name: string, question: T): ListQuestion<T> {
-
-            var list = <ListQuestion<T>>this.addQuestion(new ListQuestion<T>(name, this).ofQuestion(question));
-
-            this.questions.splice(this.questions.indexOf(question), 1);
-
-            return list;
-        }
-
-        combinedQuestion(name: string, ...questions: Question[]): CombinationQuestion {
-
-            questions.forEach(q => {
-
-                this.questions.splice(this.questions.indexOf(q), 1);
-            });
-
-            return <CombinationQuestion>this.addQuestion(new CombinationQuestion(name, this).withQuestions(questions));
-        }
-
-        addChoiceQuestion<T>(name: string): ChoiceQuestion<T> {
-
-            return <ChoiceQuestion<T>>this.addQuestion(new ChoiceQuestion<T>(name, this));
-        }
+        /**
+        Clear the current output.
         */
-
         public clear(): void {
 
             this.term.clear();
             this.term.set_prompt("> ");
         }
 
+        /**
+        Ends the quiz.
+        */
         public end() {
 
             if (!this.term)
@@ -251,7 +234,12 @@ module TerminalQuiz {
             this.onEnd();
         }
 
-        getAnswer(question: Question): QuestionAnswer {
+        /**
+        Retrieves the answer for the supplied question.
+        @param question The question to retrieve the answer.
+        @returns The supplied question answer.
+        */
+        getAnswer(question: Question): Answer {
 
             return this.answers[question.getName()];
         }
@@ -393,6 +381,7 @@ module TerminalQuiz {
 
         /**
         Indicates if the quiz already started or not.
+        @returns false.
         */
         hasStarted(): boolean {
 
