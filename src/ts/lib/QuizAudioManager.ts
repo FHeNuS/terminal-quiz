@@ -1,27 +1,22 @@
 module TerminalQuiz {
 
-    export interface QuizAudioManagerOptions {
-
-        
-    }
-
     export class QuizAudioManager {
 
         private audioElements: {
             [audioUrl: string]: HTMLAudioElement;
-        };
+        } = {};
 
         private shouldPlayAudioHash: {
             [audioUrl: string]: boolean;
-        };
+        } = {};
 
         private audioLoopHash: {
             [audioUrl: string]: () => void;
-        };
+        } = {};
 
         private audioLoopCounter: {
             [audioUrl: string]: number;
-        };
+        } = {};
 
         constructor() {
 
@@ -32,6 +27,8 @@ module TerminalQuiz {
             var audio = document.createElement("audio");
             audio.src = src;
             document.body.appendChild(audio);
+
+            this.audioElements[name] = audio;
 
             return audio;
         }
@@ -45,7 +42,7 @@ module TerminalQuiz {
 
             if (!this.shouldPlayAudioHash[name]) {
 
-                this.playAudio(name, true);
+                this.play(name, true);
 
                 this.shouldPlayAudioHash[name] = true;
             }
@@ -55,7 +52,7 @@ module TerminalQuiz {
 
             if (this.shouldPlayAudioHash[name]) {
 
-                this.stopAudio(name);
+                this.stop(name);
 
                 this.shouldPlayAudioHash[name] = false;
             }
@@ -91,7 +88,7 @@ module TerminalQuiz {
             return !!this.getAudio(name, false);
         }
 
-        private playAudio(name: string, loop: boolean = false): void {
+        public play(name: string, loop: boolean = false): void {
 
             if (name) {
 
@@ -127,7 +124,7 @@ module TerminalQuiz {
             }
         }
 
-        private stopAudio(name: string) {
+        public stop(name: string) {
 
             if (name) {
 

@@ -13,17 +13,16 @@
         "typings/tsd.d.ts"
     ],
     "files": [
-        "src/ts/lib/AudioManager.ts",
         "src/ts/lib/Autocomplete.ts",
         "src/ts/lib/ChoiceQuestion.ts",
         "src/ts/lib/CombinationQuestion.ts",
-        "src/ts/lib/IMessenger.ts",
         "src/ts/lib/IQuizOptions.ts",
         "src/ts/lib/ListQuestion.ts",
         "src/ts/lib/Question.ts",
         "src/ts/lib/QuestionAnswer.ts",
         "src/ts/lib/QuestionProcessor.ts",
         "src/ts/lib/Quiz.ts",
+        "src/ts/lib/QuizAudioManager.ts",
         "src/ts/lib/QuizSounds.ts",
         "src/ts/lib/TextBuilder.ts",
         "src/ts/lib/TextQuestion.ts",

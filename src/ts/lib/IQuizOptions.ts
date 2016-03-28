@@ -16,7 +16,9 @@ module TerminalQuiz {
 
         backgroundSoundUrl?: string;
 
-        tipyingSoundUrl?: string;
+        quizTypingSoundUrl?: string;
+
+        userTypingSoundUrl?: string;
 
         rightAnswerSoundUrl?: string;
 

@@ -151,6 +151,15 @@ describe("Quiz", function() {
                     quiz.start();
                 });
 
+                it("should raise onAnswered event", function() {
+
+                    spyOn(quiz, 'onAnswered');
+
+                    quiz.goToNextQuestion();
+
+                    expect(quiz["onAnswered"]).toHaveBeenCalledWith(dummy1);
+                });
+
                 it("should ask the next question", function() {
 
                     spyOn(quiz, 'askCurrentQuestion');
@@ -193,6 +202,7 @@ describe("Quiz", function() {
 
                     spyOn(quiz, 'end');
                     spyOn(quiz, 'validateCurrentAnswer').and.returnValue(true);
+                    spyOn(quiz, 'onAnswered');
 
                     quiz.goToNextQuestion();
                     quiz.goToNextQuestion();
@@ -201,6 +211,11 @@ describe("Quiz", function() {
                 it("should call end method", function() {
 
                     expect(quiz.getCurrentQuestion()).toBe(dummy2);
+                });
+
+                it("should raise onAnswered event", function() {
+
+                    expect(quiz["onAnswered"]).toHaveBeenCalledWith(dummy2);
                 });
 
                 it("should not ask the next question", function() {
@@ -228,6 +243,7 @@ describe("Quiz", function() {
                 question = new DummyQuestion("Dummy1");
                 answer = new TerminalQuiz.QuestionAnswer();
                 processor = new TerminalQuiz.QuestionProcessor(question);
+                quiz.initialize();
 
                 spyOn(quiz, 'getCurrentQuestion').and.returnValue(question);
                 spyOn(quiz, 'getAnswer').and.returnValue(answer);
@@ -248,9 +264,9 @@ describe("Quiz", function() {
 
                 spyOn(quiz, 'echoFail');
 
-                spyOn(processor, 'validateAnswer').and.callFake((answer, messenger) => {
+                spyOn(processor, 'validateAnswer').and.callFake(() => {
 
-                    (<TerminalQuiz.IMessenger>messenger).echoFail("someFailure");
+                    answer.isValid = false;
                 });
 
                 expect(quiz.validateCurrentAnswer()).toBe(false);

@@ -21,6 +21,7 @@
         <script src="../../../bower_components/jasmine-core/lib/jasmine-core/jasmine.js"></script>
         <!-- endbower -->
         <script type="text/javascript" src="../../../build/js/lib/QuizSounds.js"></script>
+        <script type="text/javascript" src="../../../build/js/lib/QuizAudioManager.js"></script>
         <script type="text/javascript" src="../../../build/js/lib/Quiz.js"></script>
         <script type="text/javascript" src="../../../build/js/lib/Question.js"></script>
         <script type="text/javascript" src="../../../build/js/lib/QuestionProcessor.js"></script>
@@ -31,7 +32,17 @@
 
             var quiz = new TerminalQuiz.Quiz($("#container").get(0), {
 
-              typeMessageDelay: 50
+              typeMessageDelay: 50,
+
+              backgroundSoundUrl: "Background.wav",
+
+              quizTypingSoundUrl: "Type.wav",
+
+              rightAnswerSoundUrl: "Right.wav",
+
+              wrongAnswerSoundUrl: "Wrong.wav",
+
+              userTypingSoundUrl: "Menu.wav"
             });
 
             quiz.initialize();

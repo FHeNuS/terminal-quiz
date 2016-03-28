@@ -5,6 +5,7 @@ module TerminalQuiz {
         WrongAnswer = <any>'WrongAudio',
         RightAnswer = <any>'RightAudio',
         Background = <any>'BackgroundAudio',
-        Type = <any>"TypingAudio"
+        QuizTyping = <any>"QuizTypingAudio",
+        UserTyping = <any>"UserTypingAudio",
     }
 }

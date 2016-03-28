@@ -29,7 +29,7 @@ module TerminalQuiz {
             return userAnswer;
         }
 
-        public validateAnswer(parsedAnswer: any, messenger: IMessenger) : void {
+        public validateAnswer(parsedAnswer: any, ctx: QuizContext) : void {
 
             var isRequired = false;
 
@@ -42,7 +42,7 @@ module TerminalQuiz {
 
             if (isRequired && !parsedAnswer) {
 
-                messenger.echoFail('Please provide an answer for this question!');
+                ctx.echoFail('Please provide an answer for this question!');
             }
         }
 

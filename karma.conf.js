@@ -15,6 +15,8 @@ module.exports = function (config) {
             "vendor/js/jquery.js"
             , "bower_components/jquery.terminal/js/jquery.terminal-src.js"
             , "vendor/js/jquery.mousewheel-min.js"
+            , './build/js/lib/QuizAudioManager.js'
+            , './build/js/lib/QuizSounds.js'
             , './build/js/lib/Quiz.js'
             , './build/js/lib/Question.js'
             , './build/js/lib/QuestionAnswer.js'

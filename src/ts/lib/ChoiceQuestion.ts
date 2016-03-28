@@ -40,11 +40,11 @@ module TerminalQuiz {
             return (answerIdx != -1) ? this.question.getOpts()[answerIdx] : null;
         }
 
-        public validateAnswer(parsedAnswer: any, messenger: IMessenger): void {
+        public validateAnswer(parsedAnswer: any, ctx: QuizContext): void {
 
             if (!parsedAnswer) {
 
-                messenger.echoFail("Please select a valid choice number!");
+                ctx.echoFail("Please select a valid choice number!");
             }
         }
 
@@ -114,9 +114,12 @@ module TerminalQuiz {
                 
                 this.displaySelectedChoice();
 
-            } else {
+            } else if ((typedKey >= 48 && typedKey <= 57) || (typedKey >= 96 && typedKey <= 105)) {
 
-                var typedChar = String.fromCharCode(typedKey);
+                var isNumPad = (typedKey >= 96 && typedKey <= 105);
+
+                // 0 to 9 Keys and NumPad Keys
+                var typedChar = (isNumPad) ? "" + (typedKey - 96) : String.fromCharCode(typedKey);
 
                 if (/^\d$/.test(typedChar)) {
 
@@ -130,8 +133,22 @@ module TerminalQuiz {
 
                         // If its a digit between the valid choices, returns as valid
                         validKey = true;
+
+                    } else {
+
+                        ctx.echoFail("Please type a valid choice number or use the UP and DOWN arrows!");
                     }
                 }
+
+            } else if (typedKey >= 65 && typedKey <= 90) {
+
+                // A TO Z
+                ctx.echoFail("Please type a valid choice number or use the UP and DOWN arrows!");
+
+            } else {
+
+                // It could be special keys, so they are valid because they may trigger another functionality
+                validKey = true;
             }
 
             return validKey;

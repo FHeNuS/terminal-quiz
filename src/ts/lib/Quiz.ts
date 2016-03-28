@@ -5,6 +5,12 @@ module TerminalQuiz {
         getAnswer(): string;
 
         setAnswer(answer: string);
+
+        echoSuccess(msg: string): void;
+
+        echoFail(msg: string): void;
+
+        playSound(sound: QuizSounds);
     }
 
     export class Quiz {
@@ -15,10 +21,10 @@ module TerminalQuiz {
 
         }
 
+        private audioManager: QuizAudioManager;
         private currentQuestionIdx: number;
         private started = false;
         private term: any;
-        private i: QuizContext;
         private questions = new Array<Question>();
         private answers: {
             [name: string]: QuestionAnswer
@@ -26,7 +32,7 @@ module TerminalQuiz {
         private anim: boolean = false;
         private greetings: String | (() => string);
         private ctx: QuizContext;
-        
+
         private separateTextFromElements(elem: Node, bag: any) {
 
             if (elem.hasChildNodes) {
@@ -75,7 +81,7 @@ module TerminalQuiz {
 
                                 processed = true;
 
-                                this.playAudio(QuizSounds.Type, true);
+                                this.playAudio(QuizSounds.QuizTyping, true);
 
                                 // Clears dummy element created
                                 container.empty();
@@ -112,7 +118,7 @@ module TerminalQuiz {
                                             // execute in next interval
                                             setTimeout(() => {
 
-                                                this.stopAudio(QuizSounds.Type);
+                                                this.stopAudio(QuizSounds.QuizTyping);
 
                                                 // swap command with prompt
                                                 this.anim = false;
@@ -143,9 +149,12 @@ module TerminalQuiz {
 
         private echo(message: HTMLElement) {
 
+            var currentCmd = this.term.get_command();
+            this.term.set_command('');
+
             this.animatedType(message, () => {
 
-                this.term.set_command('');
+                this.term.set_command(currentCmd);
             });
         }
 
@@ -169,6 +178,17 @@ module TerminalQuiz {
 
             this.echo($(`<div class="echo-fail">${msg}</div>`).get(0));
             this.playAudio(QuizSounds.WrongAnswer);
+
+            var question = this.getCurrentQuestion();
+
+            if (question) {
+
+                // If there is a current question, sets a not valid
+                var answer = this.getAnswer(question);
+
+                // By default is valid
+                answer.isValid = false;
+            }
         }
 
         echoSuccess(msg: string) {
@@ -251,41 +271,25 @@ module TerminalQuiz {
 
         onKeyPress(event: KeyboardEvent): boolean {
 
-            return this.getCurrentQuestion().getProcessor().onKeyPress(event.keyCode, this.ctx);
+            this.playAudio(QuizSounds.UserTyping);
+
+            var currentQuestion = this.getCurrentQuestion();
+
+            if (currentQuestion)
+                return currentQuestion.getProcessor().onKeyPress(event.keyCode, this.ctx);
         }
 
         validateCurrentAnswer(): boolean {
 
-            var isValid = false;
             var question = this.getCurrentQuestion();
+            var answer = this.getAnswer(question);
 
-            if (question) {
+            // By default is valid
+            answer.isValid = true;
 
-                var answer = this.getAnswer(question);
+            question.getProcessor().validateAnswer(answer.parsedAnswer, this.ctx);
 
-                // By default is valid
-                answer.isValid = true;
-
-                question.getProcessor().validateAnswer(answer.parsedAnswer, {
-
-                    echoFail: (msg) => {
-
-                        // If any fail message is raised, it is marked as invalid
-                        answer.isValid = false;
-
-                        this.echoFail(msg);
-                    },
-
-                    echoSuccess: (msg) => {
-
-                        this.echoSuccess(msg);
-                    }
-                });
-
-                isValid = answer.isValid;
-            }
-
-            return isValid;
+            return answer.isValid;
         }
 
         /**
@@ -293,6 +297,7 @@ module TerminalQuiz {
         */
         initialize(): void {
 
+            // initialize terminal
             this.term = window["$"](this.element).terminal((cmd: string, term) => {
 
                 this.onUserCommand(cmd);
@@ -322,6 +327,7 @@ module TerminalQuiz {
                     checkArity: false
                 });
 
+            // Creates ctx
             this.ctx = {
 
                 getAnswer: () => {
@@ -331,8 +337,40 @@ module TerminalQuiz {
                 setAnswer: (answer: string) => {
 
                     this.term.set_command(answer);
+                },
+                echoFail: (msg) => {
+
+                    this.echoFail(msg);
+                },
+
+                echoSuccess: (msg) => {
+
+                    this.echoSuccess(msg);
+                },
+
+                playSound: (sound) => {
+
+                    this.playAudio(sound, false);
                 }
             }
+
+            // adds sounds
+            this.audioManager = new QuizAudioManager();
+
+            if (this.opts.backgroundSoundUrl)
+                this.audioManager.addAudio(QuizSounds.Background.toString(), this.opts.backgroundSoundUrl);
+
+            if (this.opts.rightAnswerSoundUrl)
+                this.audioManager.addAudio(QuizSounds.RightAnswer.toString(), this.opts.rightAnswerSoundUrl);
+
+            if (this.opts.wrongAnswerSoundUrl)
+                this.audioManager.addAudio(QuizSounds.WrongAnswer.toString(), this.opts.wrongAnswerSoundUrl);
+
+            if (this.opts.userTypingSoundUrl)
+                this.audioManager.addAudio(QuizSounds.UserTyping.toString(), this.opts.userTypingSoundUrl);
+
+            if (this.opts.quizTypingSoundUrl)
+                this.audioManager.addAudio(QuizSounds.QuizTyping.toString(), this.opts.quizTypingSoundUrl);
         }
 
         /**
@@ -404,6 +442,10 @@ module TerminalQuiz {
 
             if (this.validateCurrentAnswer()) {
 
+                this.onAnswered(this.getCurrentQuestion());
+
+                this.playAudio(QuizSounds.RightAnswer);
+
                 var isLastQuestion = this.currentQuestionIdx == (this.questions.length - 1);
 
                 if (isLastQuestion) {
@@ -417,6 +459,10 @@ module TerminalQuiz {
 
                     this.askCurrentQuestion();
                 }
+
+            } else {
+
+                this.playAudio(QuizSounds.WrongAnswer);
             }
         }
 
@@ -434,6 +480,11 @@ module TerminalQuiz {
             }
         }
 
+        private onAnswered(question: Question) {
+
+
+        }
+
         private onEnd() {
 
 
@@ -441,10 +492,18 @@ module TerminalQuiz {
 
         private playAudio(sound: QuizSounds, loop = false) {
 
+            var soundName = sound.toString();
+
+            if (this.audioManager.hasAudio(soundName))
+                this.audioManager.play(soundName, loop);
         }
 
         private stopAudio(sound: QuizSounds) {
 
+            var soundName = sound.toString();
+
+            if (this.audioManager.hasAudio(soundName))
+                this.audioManager.stop(soundName);
         }
     }
 }
