@@ -31,12 +31,14 @@ gulp.task('build-script', function () {
     'src/ts/lib/IQuizOptions.ts',
     'src/ts/lib/QuizSounds.ts',
     'src/ts/lib/QuizAudioManager.ts',
+    'src/ts/lib/IQuiz.ts',
     'src/ts/lib/Quiz.ts',
     'src/ts/lib/Question.ts',
     'src/ts/lib/QuestionProcessor.ts',
     'src/ts/lib/Answer.ts',
     'src/ts/lib/TextQuestion.ts',
     'src/ts/lib/ChoiceQuestion.ts',
+    'src/ts/lib/JQuery.ts',
     'typings/tsd.d.ts'])
                          .pipe(sourcemaps.init()) // This means sourcemaps will be generated
                          .pipe($.typescript(tsProject, {

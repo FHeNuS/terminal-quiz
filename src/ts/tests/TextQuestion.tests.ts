@@ -11,6 +11,22 @@ describe("TextQuestionProcessor", () => {
         ctx = jasmine.createSpyObj("ctx", ["echoFail"]);
     })
 
+    describe("quiz.askText", () => {
+
+        it("should return a valid TextQuestion instance and add it to the quiz", () => {
+
+            var quiz = <TerminalQuiz.IQuiz>new TerminalQuiz.Quiz($('<div/>').get(0), {
+
+            });
+
+            var question = quiz.askText("someName");
+
+            expect(question).not.toBeNull();
+
+            expect(quiz.getAnswer(question)).not.toBeNull();
+        });
+    })
+
     describe("validateAnswer", () => {
 
         describe("has pattern", () => {

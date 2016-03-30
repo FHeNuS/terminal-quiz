@@ -13,6 +13,10 @@ module TerminalQuiz {
         playSound(sound: QuizSounds);
     }
 
+    export interface IQuiz extends Quiz {
+
+    }
+    
     export class Quiz {
 
         static CMD_SEPARATOR = " ";

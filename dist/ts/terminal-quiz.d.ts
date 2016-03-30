@@ -44,6 +44,7 @@ declare module TerminalQuiz {
     }
 }
 
+
 declare module TerminalQuiz {
     interface QuizContext {
         getAnswer(): string;
@@ -51,6 +52,8 @@ declare module TerminalQuiz {
         echoSuccess(msg: string): void;
         echoFail(msg: string): void;
         playSound(sound: QuizSounds): any;
+    }
+    interface IQuiz extends Quiz {
     }
     class Quiz {
         private element;
@@ -74,7 +77,7 @@ declare module TerminalQuiz {
         @param question The question to add.
         @returns The added question, for chanining purposes.
         */
-        addQuestion<T extends Question>(question: T): T;
+        ask<T extends Question>(question: T): T;
         /**
         Writes an error message and marks the current question (if there is) as not valid.
         @param msg Message to write.
@@ -221,6 +224,9 @@ declare module TerminalQuiz {
         getDetail(): HTMLElement;
         validateAnswer(parsedAnswer: any, ctx: QuizContext): void;
     }
+    interface IQuiz {
+        askText(name: string): TextQuestion;
+    }
 }
 
 declare module TerminalQuiz {
@@ -244,4 +250,8 @@ declare module TerminalQuiz {
         withOpts(opts: Array<T>): ChoiceQuestion<T>;
         withOptsName(nameGetter: (opt: T) => string): ChoiceQuestion<T>;
     }
+}
+
+interface JQuery {
+    terminalQuiz(options: TerminalQuiz.IQuizOptions): TerminalQuiz.IQuiz;
 }

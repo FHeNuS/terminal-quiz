@@ -46,7 +46,7 @@
         public validateAnswer(parsedAnswer: any, ctx: QuizContext) : void {
 
             super.validateAnswer(parsedAnswer, ctx);
-            
+
             var regex = this.question.getPattern();
 
             if (parsedAnswer && regex) {
@@ -60,5 +60,15 @@
                 }
             }
         }
+    }
+
+    export interface IQuiz {
+
+        askText(name: string) : TextQuestion;
+    }
+
+    Quiz.prototype["askText"] = function() {
+
+       return this.ask(new TextQuestion(name));
     }
 }
