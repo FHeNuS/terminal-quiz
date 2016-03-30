@@ -47,9 +47,11 @@
 
             quiz.initialize();
 
-            quiz.addQuestion(new TerminalQuiz.ChoiceQuestion("SampleQuestion").withTitle("A question?").withOpts(["First Choice", "Second Choice"]).asRequired());
+            quiz.addQuestion(new TerminalQuiz.ChoiceQuestion("Choice").withTitle("A question?").withOpts(["First Choice", "Second Choice"]).asRequired());
 
-            quiz.addQuestion(new TerminalQuiz.TextQuestion("SampleQuestion2").withTitle("Another question?").asRequired());
+            quiz.addQuestion(new TerminalQuiz.TextQuestion("RequiredText").withTitle("A required text question?").asRequired());
+
+            quiz.addQuestion(new TerminalQuiz.TextQuestion("TextWithPattern").withTitle("A non required text question with a pattern").withPattern(/\d\d\d/, "###"));
 
             quiz.start();
 

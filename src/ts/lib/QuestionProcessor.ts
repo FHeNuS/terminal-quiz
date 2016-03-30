@@ -6,15 +6,6 @@ module TerminalQuiz {
 
         }
 
-        /**
-        Returns the callback (if any) responsible for this questions autocomplete.
-        @return Autocomplete callback.
-        */
-        public _getCompletionCallback(): TerminalQuiz.Autocomplete {
-
-            return null;
-        }
-
         public getDetail(): HTMLElement {
 
             return null;

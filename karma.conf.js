@@ -25,6 +25,7 @@ module.exports = function (config) {
             , './build/js/tests/Utils.js'
             , './build/js/tests/Quiz.tests.js'
             , './build/js/tests/Question.tests.js'
+            , './build/js/tests/TextQuestion.tests.js'
             , {
               pattern: './src/ts/tests/fixtures/*.html',
               included: false,

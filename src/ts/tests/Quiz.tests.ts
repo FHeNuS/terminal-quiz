@@ -35,17 +35,17 @@ describe("Quiz", function() {
         });
     });
 
-    describe("addQuestion", () => {
+    describe("ask", () => {
 
         describe("duplicated question name", () => {
 
             it("should throw an Error", () => {
 
-                quiz.addQuestion(new DummyQuestion("sameName"));
+                quiz.ask(new DummyQuestion("sameName"));
 
                 expect(() => {
 
-                    quiz.addQuestion(new DummyQuestion("sameName"));
+                    quiz.ask(new DummyQuestion("sameName"));
 
                 }).toThrowError(`Cannot add a question named 'sameName' twice!`);
             });
@@ -76,7 +76,7 @@ describe("Quiz", function() {
 
                 dummyQuestion = new DummyQuestion("The sample question.").withTitle("Title");
 
-                quiz.addQuestion(dummyQuestion);
+                quiz.ask(dummyQuestion);
             });
 
             it("should set the first question as the current", function() {
@@ -136,8 +136,8 @@ describe("Quiz", function() {
 
             beforeEach(() => {
 
-                dummy1 = quiz.addQuestion(new DummyQuestion("Dummy1")).withTitle("Title");
-                dummy2 = quiz.addQuestion(new DummyQuestion("Dummy2")).withTitle("Title");
+                dummy1 = quiz.ask(new DummyQuestion("Dummy1")).withTitle("Title");
+                dummy2 = quiz.ask(new DummyQuestion("Dummy2")).withTitle("Title");
 
                 quiz.start();
             });
@@ -282,7 +282,7 @@ describe("Quiz", function() {
             beforeEach(() => {
 
                 quiz.initialize();
-                quiz.addQuestion(new DummyQuestion("Dummy").withTitle("Title"));
+                quiz.ask(new DummyQuestion("Dummy").withTitle("Title"));
                 quiz.start();
             });
 

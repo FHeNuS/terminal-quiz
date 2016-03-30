@@ -107,7 +107,7 @@ gulp.task('buildAndWatch', ['build'], function () {
     gulp.start('watch');
 });
 
-gulp.task('dist', ['build', 'build-css', 'build-script', 'dist-clean'], function () {
+gulp.task('dist', ['dist-clean'], function () {
 
     gulp.start('dist-css', 'dist-script', 'dist-ts');
 });

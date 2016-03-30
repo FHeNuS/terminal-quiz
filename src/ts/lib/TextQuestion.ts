@@ -14,6 +14,16 @@
             return this;
         }
 
+        getPattern(): RegExp {
+
+            return this.regex;
+        }
+
+        getFriendlyPattern(): string {
+
+            return this.friendlyRegex;
+        }
+
         initialize() : void {
 
             if (!this.getProcessor()) {
@@ -31,6 +41,24 @@
 
             // Text questions by default do not have detail
             return null;
+        }
+
+        public validateAnswer(parsedAnswer: any, ctx: QuizContext) : void {
+
+            super.validateAnswer(parsedAnswer, ctx);
+            
+            var regex = this.question.getPattern();
+
+            if (parsedAnswer && regex) {
+
+                // If an answer was supplied and a regex also, test the answer
+                // to see it matches the pattern
+                if (!this.question.getPattern().test(parsedAnswer)) {
+
+                    // If it does not match, raise an error
+                    ctx.echoFail(`The answer '${parsedAnswer}' does not respect the pattern '${this.question.getFriendlyPattern()}'!`)
+                }
+            }
         }
     }
 }

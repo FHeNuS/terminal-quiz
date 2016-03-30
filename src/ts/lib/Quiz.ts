@@ -163,7 +163,7 @@ module TerminalQuiz {
         @param question The question to add.
         @returns The added question, for chanining purposes.
         */
-        addQuestion<T extends Question>(question: T): T {
+        ask<T extends Question>(question: T): T {
 
             if (!!this.answers[question.getName()])
                 throw new Error(`Cannot add a question named '${question.getName()}' twice!`);

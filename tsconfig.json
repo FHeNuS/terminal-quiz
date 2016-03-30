@@ -27,6 +27,7 @@
         "src/ts/tests/Question.tests.ts",
         "src/ts/tests/Quiz.tests.ts",
         "src/ts/tests/SmokeTests.ts",
+        "src/ts/tests/TextQuestion.tests.ts",
         "src/ts/tests/Utils.ts",
         "typings/tsd.d.ts"
     ],
