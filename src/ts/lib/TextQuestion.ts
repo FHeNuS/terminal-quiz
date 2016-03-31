@@ -1,4 +1,4 @@
- module TerminalQuiz {
+module TerminalQuiz {
 
     export class TextQuestion extends Question {
 
@@ -24,7 +24,7 @@
             return this.friendlyRegex;
         }
 
-        initialize() : void {
+        initialize(): void {
 
             if (!this.getProcessor()) {
 
@@ -43,7 +43,7 @@
             return null;
         }
 
-        public validateAnswer(parsedAnswer: any, ctx: QuizContext) : void {
+        public validateAnswer(parsedAnswer: any, ctx: QuizContext): void {
 
             super.validateAnswer(parsedAnswer, ctx);
 
@@ -64,11 +64,11 @@
 
     export interface IQuiz {
 
-        askText(name: string) : TextQuestion;
+        askText(name: string): TextQuestion;
     }
 
-    Quiz.prototype["askText"] = function() {
+    Quiz.prototype["askText"] = function(name: string) {
 
-       return this.ask(new TextQuestion(name));
+        return this.ask(new TextQuestion(name));
     }
 }

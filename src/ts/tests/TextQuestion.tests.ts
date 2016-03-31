@@ -21,6 +21,8 @@ describe("TextQuestionProcessor", () => {
 
             var question = quiz.askText("someName");
 
+            expect(question.getName()).toBe("someName");
+            
             expect(question).not.toBeNull();
 
             expect(quiz.getAnswer(question)).not.toBeNull();

@@ -38,7 +38,7 @@ gulp.task('build-script', function () {
     'src/ts/lib/Answer.ts',
     'src/ts/lib/TextQuestion.ts',
     'src/ts/lib/ChoiceQuestion.ts',
-    'src/ts/lib/JQuery.ts',
+    'src/ts/lib/JQueryPlugin.ts',
     'typings/tsd.d.ts'])
                          .pipe(sourcemaps.init()) // This means sourcemaps will be generated
                          .pipe($.typescript(tsProject, {
@@ -79,24 +79,26 @@ gulp.task('build-css', function () {
         .pipe(gulp.dest('build/css'));
 });
 
-gulp.task('dist-css', function () {
+gulp.task('dist-css', ['build-css'], function () {
     return gulp.src('build/css/**/*.css')
         .pipe($.cssnano())
         .pipe($.concat('terminal-quiz.css'))
         .pipe(gulp.dest('dist/css'))
 });
 
-gulp.task('dist-script', function () {
+gulp.task('dist-script', ['build-script'], function () {
 
-    return gulp.src('build/js/terminal-quiz.js')
+    return $.merge2([
+        gulp.src('build/ts/**/terminal-quiz.d.ts')
+        .pipe(gulp.dest('dist/ts')),
+        gulp.src('build/js/terminal-quiz.js')
         .pipe($.uglify())
-        .pipe(gulp.dest('dist/js'))
+        .pipe(gulp.dest('dist/js'))])
 });
 
 gulp.task('dist-ts', function () {
 
-    return gulp.src('build/ts/**/terminal-quiz.d.ts')
-        .pipe(gulp.dest('dist/ts'))
+
 });
 
 gulp.task('build', ['build-clean'], function () {

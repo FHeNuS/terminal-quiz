@@ -1,5 +1,5 @@
 ﻿.CombinationQuestion .question-text, .CombinationQuestion .question-description, .combination-format, .combination-format-question {
-    display: inline !important;    
+    display: inline !important;
 }
 
 .combination-format-question {
@@ -50,14 +50,23 @@ ul {
     color: coral;
 }
 
-.choice-name, .choice-desc {
+.choices .choice.selected {
 
-    display:inline !important;
 }
 
-.choice-desc:not(:empty):before {
+.choice .position:after {
 
-    content: ' - '
+  content: '\00a0 \00a0-\00a0 \00a0';
+}
+
+.choice.selected {
+
+    font-weight: bold;
+}
+
+.choice.selected .position:after {
+
+  content: '\00a0 \00a0-->\00a0 \00a0';
 }
 
 li {

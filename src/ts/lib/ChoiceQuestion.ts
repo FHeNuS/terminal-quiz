@@ -7,11 +7,11 @@ module TerminalQuiz {
 
         getDetail(): HTMLElement {
 
-            this.container = $('<ol class="choices"></ul>"');
+            this.container = $('<ul class="choices"></ul>"');
 
-            this.question.getOpts().forEach((opt) => {
+            this.question.getOpts().forEach((opt, idx) => {
 
-                this.container.append(`<li class="choice"><span class="cursor"></span><span class="name">${this.question.getOptsName()(opt)}</span></li>`)
+                this.container.append(`<li class="choice"><span class="position">${idx + 1}</span><span class="name">${this.question.getOptsName()(opt)}</span></li>`)
             });
 
             return this.container.get(0);
@@ -65,7 +65,7 @@ module TerminalQuiz {
             this.container.children().eq(this.selectedIdx).addClass("selected");
         }
 
-        public onKeyPress(typedKey: number,  ctx: QuizContext): boolean {
+        public onKeyPress(typedKey: number, ctx: QuizContext): boolean {
 
             console.log(typedKey);
 
@@ -111,7 +111,7 @@ module TerminalQuiz {
                 }
 
                 ctx.setAnswer("" + (this.selectedIdx + 1));
-                
+
                 this.displaySelectedChoice();
 
             } else if ((typedKey >= 48 && typedKey <= 57) || (typedKey >= 96 && typedKey <= 105)) {
@@ -199,5 +199,21 @@ module TerminalQuiz {
 
             return this;
         }
+    }
+
+    export interface IQuiz {
+
+        askChoice<T>(name: string): ChoiceQuestion<T>;
+        askChoice<T>(name: string, options: Array<T>): ChoiceQuestion<T>;
+    }
+
+    Quiz.prototype["askChoice"] = function(name: string, options: Array<any>) {
+
+        var question = this.ask(new ChoiceQuestion(name));
+
+        if (options)
+            question.withOpts(options);
+
+        return question;
     }
 }

@@ -16,7 +16,7 @@ module TerminalQuiz {
     export interface IQuiz extends Quiz {
 
     }
-    
+
     export class Quiz {
 
         static CMD_SEPARATOR = " ";
@@ -151,12 +151,22 @@ module TerminalQuiz {
             }
         }
 
-        private echo(message: HTMLElement) {
+        /**
+        Writes a message to the terminal.
+        */
+        echo(message: string)
+        echo(message: HTMLElement)
+        echo(message: HTMLElement|string) {
+
+            if (typeof(message) === "string") {
+
+                message = $(`<div class="echo">${message}</div>`).get(0);
+            }
 
             var currentCmd = this.term.get_command();
             this.term.set_command('');
 
-            this.animatedType(message, () => {
+            this.animatedType(<HTMLElement>message, () => {
 
                 this.term.set_command(currentCmd);
             });

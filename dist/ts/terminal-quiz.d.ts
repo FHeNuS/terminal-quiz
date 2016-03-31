@@ -71,7 +71,11 @@ declare module TerminalQuiz {
         private ctx;
         private separateTextFromElements(elem, bag);
         private animatedType(message, onFinish);
-        private echo(message);
+        /**
+        Writes a message to the terminal.
+        */
+        echo(message: string): any;
+        echo(message: HTMLElement): any;
         /**
         Add the supplied question to this Quiz.
         @param question The question to add.
@@ -249,6 +253,10 @@ declare module TerminalQuiz {
         getOptsName(): (opt: T) => string;
         withOpts(opts: Array<T>): ChoiceQuestion<T>;
         withOptsName(nameGetter: (opt: T) => string): ChoiceQuestion<T>;
+    }
+    interface IQuiz {
+        askChoice<T>(name: string): ChoiceQuestion<T>;
+        askChoice<T>(name: string, options: Array<T>): ChoiceQuestion<T>;
     }
 }
 

@@ -22,10 +22,14 @@ module.exports = function (config) {
             , './build/js/lib/Answer.js'
             , './build/js/lib/QuestionProcessor.js'
             , './build/js/lib/TextQuestion.js'
+            , './build/js/lib/ChoiceQuestion.js'
+            , './build/js/lib/jQueryPlugin.js'
             , './build/js/tests/Utils.js'
             , './build/js/tests/Quiz.tests.js'
             , './build/js/tests/Question.tests.js'
             , './build/js/tests/TextQuestion.tests.js'
+            , './build/js/tests/ChoiceQuestion.tests.js'
+            , './build/js/tests/jQueryPlugin.tests.js'
             , {
               pattern: './src/ts/tests/fixtures/*.html',
               included: false,
