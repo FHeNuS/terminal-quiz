@@ -12,6 +12,8 @@ module TerminalQuiz {
 
         onEnd?: () => void;
 
+        onKeyPress?: (e: KeyboardEvent) => void;
+
         greetings?: string;
 
         backgroundSoundUrl?: string;

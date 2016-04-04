@@ -8,6 +8,8 @@
         var quiz = new TerminalQuiz.Quiz(this.get(0), options);
 
         quiz.initialize();
+
+        return quiz;
     };
 
 })(jQuery);

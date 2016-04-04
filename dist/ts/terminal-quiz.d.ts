@@ -5,6 +5,7 @@ declare module TerminalQuiz {
         onAnswer?: (question: Question) => void;
         debug?: boolean;
         onEnd?: () => void;
+        onKeyPress?: (e: KeyboardEvent) => void;
         greetings?: string;
         backgroundSoundUrl?: string;
         quizTypingSoundUrl?: string;
@@ -74,8 +75,8 @@ declare module TerminalQuiz {
         /**
         Writes a message to the terminal.
         */
-        echo(message: string): any;
-        echo(message: HTMLElement): any;
+        echo(message: string, callBack?: () => void): any;
+        echo(message: HTMLElement, callBack?: () => void): any;
         /**
         Add the supplied question to this Quiz.
         @param question The question to add.
@@ -108,7 +109,6 @@ declare module TerminalQuiz {
         getAnswer(question: Question): Answer;
         onUserCommand(cmd: any): void;
         onKeyPress(event: KeyboardEvent): boolean;
-        validateCurrentAnswer(): boolean;
         /**
         Initializes the quiz without starting it.
         */
@@ -122,6 +122,7 @@ declare module TerminalQuiz {
         @returns false.
         */
         hasStarted(): boolean;
+        private renderQuestion(question);
         /**
         Asks the current question.
         */
@@ -129,13 +130,15 @@ declare module TerminalQuiz {
         /**
         Goes to the next question.
         */
-        goToNextQuestion(): void;
+        validateCurrentQuestion(): void;
+        validateAnswer(question: any): boolean;
+        moveToNextQuestion(): void;
         getCurrentQuestion(): Question;
         destroy(): void;
         private onAnswered(question);
         private onEnd();
-        private playAudio(sound, loop?);
-        private stopAudio(sound);
+        playAudio(sound: QuizSounds, loop?: boolean): void;
+        stopAudio(sound: QuizSounds): void;
     }
 }
 
@@ -197,6 +200,7 @@ declare module TerminalQuiz {
         question: T;
         constructor(question: T);
         getDetail(): HTMLElement;
+        onRendered(ctx: QuizContext): void;
         /**
         Parses the user answer.
         @returns The parsed answer.
@@ -238,6 +242,7 @@ declare module TerminalQuiz {
         private container;
         private selectedIdx;
         getDetail(): HTMLElement;
+        onRendered(ctx: QuizContext): void;
         private getUserAnswerIdx(userAnswer);
         parseUserAnswer(userAnswer: string): any;
         validateAnswer(parsedAnswer: any, ctx: QuizContext): void;

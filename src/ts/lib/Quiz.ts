@@ -119,20 +119,15 @@ module TerminalQuiz {
                                             // This means that it processed all elements, remove interval and invoke callback
                                             clearInterval(interval);
 
-                                            // execute in next interval
-                                            setTimeout(() => {
+                                            this.stopAudio(QuizSounds.QuizTyping);
 
-                                                this.stopAudio(QuizSounds.QuizTyping);
+                                            // swap command with prompt
+                                            this.anim = false;
 
-                                                // swap command with prompt
-                                                this.anim = false;
+                                            this.term.set_prompt(prompt);
 
-                                                this.term.set_prompt(prompt);
-
-                                                if (onFinish)
-                                                    onFinish();
-
-                                            }, delay);
+                                            if (onFinish)
+                                                onFinish();
                                         }
                                     }
                                 }, delay);
@@ -154,9 +149,9 @@ module TerminalQuiz {
         /**
         Writes a message to the terminal.
         */
-        echo(message: string)
-        echo(message: HTMLElement)
-        echo(message: HTMLElement|string) {
+        echo(message: string, callBack?: () => void)
+        echo(message: HTMLElement, callBack?: () => void)
+        echo(message: HTMLElement|string, callBack?: () => void) {
 
             if (typeof(message) === "string") {
 
@@ -169,6 +164,9 @@ module TerminalQuiz {
             this.animatedType(<HTMLElement>message, () => {
 
                 this.term.set_command(currentCmd);
+
+                if (callBack)
+                    callBack();
             });
         }
 
@@ -273,25 +271,23 @@ module TerminalQuiz {
 
         onKeyPress(event: KeyboardEvent): boolean {
 
-            this.playAudio(QuizSounds.UserTyping);
+            if (this.hasStarted()) {
 
-            var currentQuestion = this.getCurrentQuestion();
+                var currentQuestion = this.getCurrentQuestion();
 
-            if (currentQuestion)
+                this.playAudio(QuizSounds.UserTyping);
+
                 return currentQuestion.getProcessor().onKeyPress(event.keyCode, this.ctx);
-        }
 
-        validateCurrentAnswer(): boolean {
+            } else {
 
-            var question = this.getCurrentQuestion();
-            var answer = this.getAnswer(question);
+                if (this.opts.onKeyPress) {
 
-            // By default is valid
-            answer.isValid = true;
+                    this.opts.onKeyPress(event);
+                }
 
-            question.getProcessor().validateAnswer(answer.parsedAnswer, this.ctx);
-
-            return answer.isValid;
+                return false;
+            }
         }
 
         /**
@@ -304,8 +300,7 @@ module TerminalQuiz {
 
                 this.onUserCommand(cmd);
 
-                this.goToNextQuestion();
-
+                this.validateCurrentQuestion();
             }, {
                     name: 'xxx',
                     //width: 800,a
@@ -402,6 +397,34 @@ module TerminalQuiz {
             return this.started;
         }
 
+        private renderQuestion(question: Question) {
+
+            this.term.clear();
+
+            question.initialize();
+
+            var questionElem = $(`<div class="${question.constructor.toString().match(/\w+/g)[1]}"></div>`);
+
+            var titleElem = question.getTitle()();
+
+            var descriptionElem = question.getDescription()();
+
+            var detailElem = question.getProcessor().getDetail();
+
+            questionElem.append(titleElem);
+
+            if (descriptionElem)
+                questionElem.append(descriptionElem);
+
+            if (detailElem)
+                questionElem.append(detailElem);
+
+            this.echo(questionElem.get(0), () => {
+
+                question.getProcessor().onRendered(this.ctx);
+            });
+        }
+
         /**
         Asks the current question.
         */
@@ -411,61 +434,67 @@ module TerminalQuiz {
 
             if (question) {
 
-                this.term.clear();
+                var ifCallBack = question.getIfCallback();
 
-                question.initialize();
+                // Check if an If callback was supplied and if it returns true
+                if (!ifCallBack || ifCallBack()) {
 
-                var questionElem = $(`<div class="${question.constructor.toString().match(/\w+/g)[1]}"></div>`);
+                    this.renderQuestion(question);
 
-                var titleElem = question.getTitle()();
+                } else {
 
-                var descriptionElem = question.getDescription()();
-
-                var detailElem = question.getProcessor().getDetail();
-
-                questionElem.append(titleElem);
-
-                if (descriptionElem)
-                    questionElem.append(descriptionElem);
-
-                if (detailElem)
-                    questionElem.append(detailElem);
-
-                this.echo(questionElem.get(0));
+                    this.moveToNextQuestion();
+                }
             }
         }
 
         /**
         Goes to the next question.
         */
-        goToNextQuestion(): void {
+        validateCurrentQuestion(): void {
 
-            if (!this.started)
-                throw new Error("Cannot go to the next question because the quiz did not start yet! Did you call the start method?");
+            var question = this.getCurrentQuestion();
 
-            if (this.validateCurrentAnswer()) {
+            if (this.validateAnswer(question)) {
 
-                this.onAnswered(this.getCurrentQuestion());
+                this.onAnswered(question);
 
                 this.playAudio(QuizSounds.RightAnswer);
 
-                var isLastQuestion = this.currentQuestionIdx == (this.questions.length - 1);
-
-                if (isLastQuestion) {
-
-                    this.end();
-
-                } else {
-
-                    // If it did not reach the last question, advances
-                    this.currentQuestionIdx++;
-
-                    this.askCurrentQuestion();
-                }
+                this.moveToNextQuestion();
 
             } else {
 
                 this.playAudio(QuizSounds.WrongAnswer);
+            }
+        }
+
+        validateAnswer(question): boolean {
+
+            var answer = this.getAnswer(question);
+
+            // By default is valid
+            answer.isValid = true;
+
+            question.getProcessor().validateAnswer(answer.parsedAnswer, this.ctx);
+
+            return answer.isValid;
+        }
+
+        moveToNextQuestion() {
+
+            var isLastQuestion = this.currentQuestionIdx == (this.questions.length - 1);
+
+            if (isLastQuestion) {
+
+                this.end();
+
+            } else {
+
+                // If it did not reach the last question, advances
+                this.currentQuestionIdx++;
+
+                this.askCurrentQuestion();
             }
         }
 
@@ -485,15 +514,26 @@ module TerminalQuiz {
 
         private onAnswered(question: Question) {
 
+            var whenAnswered = question.getWhenAnsweredCallback();
 
+            if (whenAnswered) {
+
+                // Call the callback defined with the answer
+                whenAnswered(this.getAnswer(question).parsedAnswer)
+            }
         }
 
         private onEnd() {
 
+            var onEnd = this.opts.onEnd;
 
+            if (onEnd) {
+
+                onEnd();
+            }
         }
 
-        private playAudio(sound: QuizSounds, loop = false) {
+        playAudio(sound: QuizSounds, loop = false) {
 
             var soundName = sound.toString();
 
@@ -501,7 +541,7 @@ module TerminalQuiz {
                 this.audioManager.play(soundName, loop);
         }
 
-        private stopAudio(sound: QuizSounds) {
+        stopAudio(sound: QuizSounds) {
 
             var soundName = sound.toString();
 

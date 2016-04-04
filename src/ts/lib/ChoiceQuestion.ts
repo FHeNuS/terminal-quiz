@@ -3,7 +3,7 @@ module TerminalQuiz {
     export class ChoiceQuestionProcessor extends QuestionProcessor<ChoiceQuestion<any>> {
 
         private container: JQuery;
-        private selectedIdx: number;
+        private selectedIdx: number = 0;
 
         getDetail(): HTMLElement {
 
@@ -14,7 +14,16 @@ module TerminalQuiz {
                 this.container.append(`<li class="choice"><span class="position">${idx + 1}</span><span class="name">${this.question.getOptsName()(opt)}</span></li>`)
             });
 
+
+
             return this.container.get(0);
+        }
+
+        onRendered(ctx: QuizContext) {
+
+            ctx.setAnswer("1");
+            
+            this.displaySelectedChoice();
         }
 
         private getUserAnswerIdx(userAnswer: string): number {
@@ -67,8 +76,6 @@ module TerminalQuiz {
 
         public onKeyPress(typedKey: number, ctx: QuizContext): boolean {
 
-            console.log(typedKey);
-
             var validKey = false;
 
             if (typedKey == 8) {
@@ -89,14 +96,10 @@ module TerminalQuiz {
 
                     this.selectedIdx--;
 
-                } else {
+                    ctx.setAnswer("" + (this.selectedIdx + 1));
 
-                    this.selectedIdx = this.question.getOpts().length - 1;
+                    this.displaySelectedChoice();
                 }
-
-                ctx.setAnswer("" + (this.selectedIdx + 1));
-
-                this.displaySelectedChoice();
 
             } else if (typedKey == 40) {
 
@@ -105,14 +108,10 @@ module TerminalQuiz {
 
                     this.selectedIdx++;
 
-                } else {
+                    ctx.setAnswer("" + (this.selectedIdx + 1));
 
-                    this.selectedIdx = 0;
+                    this.displaySelectedChoice();
                 }
-
-                ctx.setAnswer("" + (this.selectedIdx + 1));
-
-                this.displaySelectedChoice();
 
             } else if ((typedKey >= 48 && typedKey <= 57) || (typedKey >= 96 && typedKey <= 105)) {
 

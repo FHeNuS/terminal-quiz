@@ -6,21 +6,25 @@ module TerminalQuiz {
 
         }
 
-        public getDetail(): HTMLElement {
+        getDetail(): HTMLElement {
 
             return null;
+        }
+
+        onRendered(ctx: QuizContext) {
+
         }
 
         /**
         Parses the user answer.
         @returns The parsed answer.
         */
-        public parseUserAnswer(userAnswer: string): any {
+        parseUserAnswer(userAnswer: string): any {
 
             return userAnswer;
         }
 
-        public validateAnswer(parsedAnswer: any, ctx: QuizContext) : void {
+        validateAnswer(parsedAnswer: any, ctx: QuizContext) : void {
 
             var isRequired = false;
 
@@ -37,9 +41,7 @@ module TerminalQuiz {
             }
         }
 
-        public onKeyPress(typedCharacter: number, ctx: QuizContext) : boolean {
-
-            console.log(typedCharacter);
+        onKeyPress(typedCharacter: number, ctx: QuizContext) : boolean {
 
             return true;
         }

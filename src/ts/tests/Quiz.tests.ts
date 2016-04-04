@@ -52,6 +52,66 @@ describe("Quiz", function() {
         });
     });
 
+    describe("askCurrentQuestion", () => {
+
+        var question: TerminalQuiz.Question = null;
+
+        beforeEach(() => {
+
+            quiz.initialize();
+
+            question = new DummyQuestion("someName");
+
+            spyOn(quiz, 'getCurrentQuestion').and.returnValue(question);
+
+            spyOn(quiz, 'moveToNextQuestion');
+
+            spyOn(quiz, 'renderQuestion');
+        });
+
+        describe("has no if clause", () => {
+
+            it("should render question", () => {
+
+                quiz.askCurrentQuestion();
+
+                expect(quiz["renderQuestion"]).toHaveBeenCalledWith(question);
+            });
+        });
+
+        describe("if clause returns true", () => {
+
+            it("should render question", () => {
+
+                spyOn(question, 'getIfCallback').and.returnValue(() => true);
+
+                quiz.askCurrentQuestion();
+
+                expect(quiz["renderQuestion"]).toHaveBeenCalledWith(question);
+            });
+        });
+
+        describe("question should not be asked", () => {
+
+            beforeEach(() => {
+
+                spyOn(question, 'getIfCallback').and.returnValue(() => false);
+
+                quiz.askCurrentQuestion();
+            });
+
+            it("should not render question", () => {
+
+                expect(quiz["renderQuestion"]).not.toHaveBeenCalled();
+            });
+
+            it("should go to next question", () => {
+
+                expect(quiz.moveToNextQuestion).toHaveBeenCalled();
+            })
+        });
+    });
+
     describe("start", () => {
 
         beforeEach(() => {
@@ -113,124 +173,107 @@ describe("Quiz", function() {
         });
     });
 
-    describe("goToNextQuestion", () => {
+    describe("moveToNextQuestion", () => {
+
+        var dummy1: TerminalQuiz.Question = null;
+        var dummy2: TerminalQuiz.Question = null;
 
         beforeEach(() => {
 
+            dummy1 = quiz.ask(new DummyQuestion("Dummy1")).withTitle("Title");
+            dummy2 = quiz.ask(new DummyQuestion("Dummy2")).withTitle("Title");
+
             quiz.initialize();
+            quiz.start();
         });
 
-        it("if did not start should throw an error", function() {
-
-            expect(() => {
-
-                quiz.goToNextQuestion();
-
-            }).toThrowError("Cannot go to the next question because the quiz did not start yet! Did you call the start method?")
-        });
-
-        describe("it did start", function() {
-
-            var dummy1: TerminalQuiz.Question = null;
-            var dummy2: TerminalQuiz.Question = null;
+        describe("it's not the last question", () => {
 
             beforeEach(() => {
 
-                dummy1 = quiz.ask(new DummyQuestion("Dummy1")).withTitle("Title");
-                dummy2 = quiz.ask(new DummyQuestion("Dummy2")).withTitle("Title");
+                spyOn(quiz, 'askCurrentQuestion');
 
-                quiz.start();
-            });
-
-            describe("it's not last question and current question is valid", () => {
-
-                beforeEach(() => {
-
-                    spyOn(quiz, 'validateCurrentAnswer').and.returnValue(true);
-
-                    quiz.start();
-                });
-
-                it("should raise onAnswered event", function() {
-
-                    spyOn(quiz, 'onAnswered');
-
-                    quiz.goToNextQuestion();
-
-                    expect(quiz["onAnswered"]).toHaveBeenCalledWith(dummy1);
-                });
-
-                it("should ask the next question", function() {
-
-                    spyOn(quiz, 'askCurrentQuestion');
-
-                    quiz.goToNextQuestion();
-
-                    expect(quiz.askCurrentQuestion).toHaveBeenCalled();
-                });
-
-                it("should move to the next question", function() {
-
-                    quiz.goToNextQuestion();
-
-                    expect(quiz.getCurrentQuestion()).toBe(dummy2);
-                });
+                quiz.moveToNextQuestion();
             })
 
-            describe("it's not last question and current question is not valid", () => {
+            it("should ask the next question", function() {
 
-                beforeEach(() => {
-
-                    spyOn(quiz, 'validateCurrentAnswer').and.returnValue(false);
-
-                    quiz.start();
-                });
-
-                it("should not ask the next question", function() {
-
-                    spyOn(quiz, 'askCurrentQuestion');
-
-                    quiz.goToNextQuestion();
-
-                    expect(quiz.askCurrentQuestion).not.toHaveBeenCalled();
-                });
+                expect(quiz.askCurrentQuestion).toHaveBeenCalled();
             });
 
-            describe("it's the last question", () => {
+            it("should move to the next question", function() {
 
-                beforeEach(() => {
+                expect(quiz.getCurrentQuestion()).toBe(dummy2);
+            });
+        })
+    })
 
-                    spyOn(quiz, 'end');
-                    spyOn(quiz, 'validateCurrentAnswer').and.returnValue(true);
-                    spyOn(quiz, 'onAnswered');
+    describe("validateCurrentQuestion", () => {
 
-                    quiz.goToNextQuestion();
-                    quiz.goToNextQuestion();
-                });
+        var question = null;
 
-                it("should call end method", function() {
+        beforeEach(() => {
 
-                    expect(quiz.getCurrentQuestion()).toBe(dummy2);
-                });
+            question = new DummyQuestion("someQuestion");
 
-                it("should raise onAnswered event", function() {
+            spyOn(quiz, "getCurrentQuestion").and.returnValue(question);
 
-                    expect(quiz["onAnswered"]).toHaveBeenCalledWith(dummy2);
-                });
+            spyOn(quiz, 'playAudio');
 
-                it("should not ask the next question", function() {
+            spyOn(quiz, 'onAnswered');
 
-                    spyOn(quiz, 'askCurrentQuestion');
+            spyOn(quiz, 'moveToNextQuestion');
+        });
 
-                    quiz.goToNextQuestion();
+        describe("current question is valid", () => {
 
-                    expect(quiz.askCurrentQuestion).not.toHaveBeenCalled();
-                });
+            beforeEach(() => {
+
+                spyOn(quiz, 'validateAnswer').and.returnValue(true);
+
+                quiz.validateCurrentQuestion();
             })
+
+            it("should raise onAnswered event", function() {
+
+                expect(quiz["onAnswered"]).toHaveBeenCalledWith(question);
+            });
+
+            it("should move to next question", function() {
+
+                expect(quiz.moveToNextQuestion).toHaveBeenCalled();
+            });
+
+            it("should play the RightAnswer sound", function() {
+
+                expect(quiz.playAudio).toHaveBeenCalledWith(TerminalQuiz.QuizSounds.RightAnswer);
+            });
+        })
+
+        describe("current question is invalid", () => {
+
+            beforeEach(() => {
+
+                spyOn(quiz, 'validateAnswer').and.returnValue(false);
+
+                quiz.validateCurrentQuestion();
+            })
+
+            it("should not ask the next question", function() {
+
+                expect(quiz.moveToNextQuestion).not.toHaveBeenCalled();
+
+                expect(quiz["onAnswered"]).not.toHaveBeenCalled();
+            });
+
+            it("should play the WrongAnswer sound", function() {
+
+                expect(quiz.playAudio).toHaveBeenCalledWith(TerminalQuiz.QuizSounds.WrongAnswer);
+            });
         });
     });
 
-    describe("validateCurrentAnswer", () => {
+    describe("validateAnswer", () => {
 
         describe("has current question", () => {
 
@@ -245,7 +288,6 @@ describe("Quiz", function() {
                 processor = new TerminalQuiz.QuestionProcessor(question);
                 quiz.initialize();
 
-                spyOn(quiz, 'getCurrentQuestion').and.returnValue(question);
                 spyOn(quiz, 'getAnswer').and.returnValue(answer);
                 spyOn(question, 'getProcessor').and.returnValue(processor);
             });
@@ -256,7 +298,7 @@ describe("Quiz", function() {
 
                 });
 
-                expect(quiz.validateCurrentAnswer()).toBe(true);
+                expect(quiz.validateAnswer(question)).toBe(true);
                 expect(quiz.getAnswer).toHaveBeenCalledWith(question);
             });
 
@@ -269,7 +311,7 @@ describe("Quiz", function() {
                     answer.isValid = false;
                 });
 
-                expect(quiz.validateCurrentAnswer()).toBe(false);
+                expect(quiz.validateAnswer(question)).toBe(false);
                 expect(quiz.getAnswer).toHaveBeenCalledWith(question);
             });
         });
