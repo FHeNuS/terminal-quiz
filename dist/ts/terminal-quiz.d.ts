@@ -199,6 +199,7 @@ declare module TerminalQuiz {
     class QuestionProcessor<T extends Question> {
         question: T;
         constructor(question: T);
+        render(): HTMLElement;
         getDetail(): HTMLElement;
         onRendered(ctx: QuizContext): void;
         /**

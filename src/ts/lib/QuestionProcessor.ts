@@ -6,6 +6,30 @@ module TerminalQuiz {
 
         }
 
+        render(): HTMLElement {
+
+            var questionElem = $(`<div class="${this.question.constructor.toString().match(/\w+/g)[1]}"></div>`);
+
+            if (this.question.getTitle()) {
+
+                var titleElem = this.question.getTitle()();
+
+                questionElem.append(titleElem);
+            }
+
+            var descriptionElem = this.question.getDescription()();
+
+            if (descriptionElem)
+                questionElem.append(descriptionElem);
+
+            var detailElem = this.getDetail();
+
+            if (detailElem)
+                questionElem.append(detailElem);
+
+                return questionElem.get(0);
+        }
+
         getDetail(): HTMLElement {
 
             return null;

@@ -403,26 +403,9 @@ module TerminalQuiz {
 
             question.initialize();
 
-            var questionElem = $(`<div class="${question.constructor.toString().match(/\w+/g)[1]}"></div>`);
+            var questionElem = question.getProcessor().render();
 
-            if (question.getTitle()) {
-                
-                var titleElem = question.getTitle()();
-
-                questionElem.append(titleElem);
-            }
-
-            var descriptionElem = question.getDescription()();
-
-            if (descriptionElem)
-                questionElem.append(descriptionElem);
-
-            var detailElem = question.getProcessor().getDetail();
-
-            if (detailElem)
-                questionElem.append(detailElem);
-
-            this.echo(questionElem.get(0), () => {
+            this.echo(questionElem, () => {
 
                 question.getProcessor().onRendered(this.ctx);
             });
