@@ -16,11 +16,6 @@ module TerminalQuiz {
 
         public initialize(): void {
 
-            if (!this.title || !this.title()) {
-
-                throw new Error(`The question named '${this.name}' does not define a title!`);
-            }
-
             if (!this.required) {
 
                 // If the required callback is not defined, set as not required

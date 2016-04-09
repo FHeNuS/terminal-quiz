@@ -405,16 +405,19 @@ module TerminalQuiz {
 
             var questionElem = $(`<div class="${question.constructor.toString().match(/\w+/g)[1]}"></div>`);
 
-            var titleElem = question.getTitle()();
+            if (question.getTitle()) {
+                
+                var titleElem = question.getTitle()();
+
+                questionElem.append(titleElem);
+            }
 
             var descriptionElem = question.getDescription()();
 
-            var detailElem = question.getProcessor().getDetail();
-
-            questionElem.append(titleElem);
-
             if (descriptionElem)
                 questionElem.append(descriptionElem);
+
+            var detailElem = question.getProcessor().getDetail();
 
             if (detailElem)
                 questionElem.append(detailElem);
