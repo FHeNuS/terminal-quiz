@@ -199,5 +199,15 @@ module TerminalQuiz {
 
             return this;
         }
+
+        /**
+        Renders this question and returns the resulting HTMLElement.
+        */
+        render() : HTMLElement {
+
+            this.initialize();
+
+            return this.getProcessor().render();
+        }
     }
 }

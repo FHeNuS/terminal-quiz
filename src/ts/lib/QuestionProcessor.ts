@@ -6,6 +6,11 @@ module TerminalQuiz {
 
         }
 
+        showPrompt(): boolean {
+
+            return true;
+        }
+
         render(): HTMLElement {
 
             var questionElem = $(`<div class="${this.question.constructor.toString().match(/\w+/g)[1]}"></div>`);

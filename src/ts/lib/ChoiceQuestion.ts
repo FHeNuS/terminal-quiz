@@ -14,29 +14,22 @@ module TerminalQuiz {
                 this.container.append(`<li class="choice"><span class="position">${idx + 1}</span><span class="name">${this.question.getOptsName()(opt)}</span></li>`)
             });
 
-
-
             return this.container.get(0);
         }
 
         onRendered(ctx: QuizContext) {
 
-            ctx.setAnswer("1");
-            
             this.displaySelectedChoice();
         }
 
-        private getUserAnswerIdx(userAnswer: string): number {
+        private getUserAnswerIdx(userAnswer: number): number {
 
             var answerIdx = -1;
 
-            // The user answer should be a index with the selected choice
-            var parsedValue = parseInt(userAnswer);
-
-            if (parsedValue > 0 && parsedValue <= this.question.getOpts().length) {
+            if (userAnswer > 0 && userAnswer <= this.question.getOpts().length) {
 
                 // Decrements one from the answer because array indexes are zero-based and the answers are one-based
-                answerIdx = parsedValue - 1;
+                answerIdx = userAnswer - 1;
             }
 
             return answerIdx;
@@ -44,9 +37,7 @@ module TerminalQuiz {
 
         public parseUserAnswer(userAnswer: string): any {
 
-            var answerIdx = this.getUserAnswerIdx(userAnswer);
-
-            return (answerIdx != -1) ? this.question.getOpts()[answerIdx] : null;
+            return (this.selectedIdx >= 0) ? this.question.getOpts()[this.selectedIdx] : null;
         }
 
         public validateAnswer(parsedAnswer: any, ctx: QuizContext): void {
@@ -78,25 +69,12 @@ module TerminalQuiz {
 
             var validKey = false;
 
-            if (typedKey == 8) {
-
-                // BACKSPACE
-                validKey = true;
-
-                if (ctx.getAnswer().length == 1) {
-
-                    // If is erasing the last character, should clear the selected choice
-                    this.clearSelectedChoice();
-                }
-
-            } else if (typedKey == 38) {
+            if (typedKey == 38) {
 
                 // UP ARROW
                 if (this.selectedIdx > 0) {
 
                     this.selectedIdx--;
-
-                    ctx.setAnswer("" + (this.selectedIdx + 1));
 
                     this.displaySelectedChoice();
                 }
@@ -107,8 +85,6 @@ module TerminalQuiz {
                 if (this.selectedIdx < (this.question.getOpts().length - 1)) {
 
                     this.selectedIdx++;
-
-                    ctx.setAnswer("" + (this.selectedIdx + 1));
 
                     this.displaySelectedChoice();
                 }
@@ -122,16 +98,16 @@ module TerminalQuiz {
 
                 if (/^\d$/.test(typedChar)) {
 
-                    var answerIdx = this.getUserAnswerIdx(ctx.getAnswer() + typedChar);
+                    var answerIdx = this.getUserAnswerIdx(parseInt(typedChar));
 
-                    if (answerIdx > -1) {
+                    if (answerIdx >= 0) {
 
                         this.selectedIdx = answerIdx;
 
                         this.displaySelectedChoice();
 
                         // If its a digit between the valid choices, returns as valid
-                        validKey = true;
+                        validKey = false;
 
                     } else {
 
@@ -151,6 +127,11 @@ module TerminalQuiz {
             }
 
             return validKey;
+        }
+
+        showPrompt(): boolean {
+
+            return false;
         }
     }
 

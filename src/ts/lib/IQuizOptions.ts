@@ -6,11 +6,15 @@ module TerminalQuiz {
 
         autoStart?: boolean;
 
-        onAnswer?: (question: Question) => void;
-
         debug?: boolean;
 
-        onEnd?: () => void;
+        onStart?(): void;
+
+        onEnd?(): void;
+
+        onQuestionRendered?(question: Question): void;
+
+        onQuestionAnswered?(question: Question, answer: Answer): void;
 
         onKeyPress?: (e: KeyboardEvent) => void;
 

@@ -2,9 +2,11 @@ declare module TerminalQuiz {
     interface IQuizOptions {
         typeMessageDelay?: number;
         autoStart?: boolean;
-        onAnswer?: (question: Question) => void;
         debug?: boolean;
-        onEnd?: () => void;
+        onStart?(): void;
+        onEnd?(): void;
+        onQuestionRendered?(question: Question): void;
+        onQuestionAnswered?(question: Question, answer: Answer): void;
         onKeyPress?: (e: KeyboardEvent) => void;
         greetings?: string;
         backgroundSoundUrl?: string;
@@ -122,7 +124,11 @@ declare module TerminalQuiz {
         @returns false.
         */
         hasStarted(): boolean;
-        private renderQuestion(question);
+        /**
+        Renders the supplied question at the terminal.
+        @param question Question to render.
+        */
+        renderQuestion(question: Question): void;
         /**
         Asks the current question.
         */
@@ -135,7 +141,7 @@ declare module TerminalQuiz {
         moveToNextQuestion(): void;
         getCurrentQuestion(): Question;
         destroy(): void;
-        private onAnswered(question);
+        onQuestionAnswered(question: Question): void;
         private onEnd();
         playAudio(sound: QuizSounds, loop?: boolean): void;
         stopAudio(sound: QuizSounds): void;
@@ -192,6 +198,10 @@ declare module TerminalQuiz {
         Sets the question processor.
         */
         withProcessor(processor: QuestionProcessor<any>): this;
+        /**
+        Renders this question and returns the resulting HTMLElement.
+        */
+        render(): HTMLElement;
     }
 }
 
@@ -199,6 +209,7 @@ declare module TerminalQuiz {
     class QuestionProcessor<T extends Question> {
         question: T;
         constructor(question: T);
+        showPrompt(): boolean;
         render(): HTMLElement;
         getDetail(): HTMLElement;
         onRendered(ctx: QuizContext): void;
@@ -250,6 +261,7 @@ declare module TerminalQuiz {
         private clearSelectedChoice();
         private displaySelectedChoice();
         onKeyPress(typedKey: number, ctx: QuizContext): boolean;
+        showPrompt(): boolean;
     }
     class ChoiceQuestion<T> extends Question {
         private opts;

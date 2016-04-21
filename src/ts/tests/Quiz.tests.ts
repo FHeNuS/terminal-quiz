@@ -7,6 +7,7 @@ import DummyQuestion = TerminalQuiz.Tests.DummyQuestion;
 describe("Quiz", function() {
 
     var quiz: TerminalQuiz.Quiz = null;
+    var options: TerminalQuiz.IQuizOptions = {};
     var container: JQuery = null;
 
     beforeEach(() => {
@@ -15,7 +16,7 @@ describe("Quiz", function() {
 
         container = $("#container");
 
-        quiz = new TerminalQuiz.Quiz(container.get(0), {});
+        quiz = new TerminalQuiz.Quiz(container.get(0), options);
     });
 
     afterEach(() => {
@@ -75,7 +76,7 @@ describe("Quiz", function() {
 
                 quiz.askCurrentQuestion();
 
-                expect(quiz["renderQuestion"]).toHaveBeenCalledWith(question);
+                expect(quiz.renderQuestion).toHaveBeenCalledWith(question);
             });
         });
 
@@ -87,7 +88,7 @@ describe("Quiz", function() {
 
                 quiz.askCurrentQuestion();
 
-                expect(quiz["renderQuestion"]).toHaveBeenCalledWith(question);
+                expect(quiz.renderQuestion).toHaveBeenCalledWith(question);
             });
         });
 
@@ -102,7 +103,7 @@ describe("Quiz", function() {
 
             it("should not render question", () => {
 
-                expect(quiz["renderQuestion"]).not.toHaveBeenCalled();
+                expect(quiz.renderQuestion).not.toHaveBeenCalled();
             });
 
             it("should go to next question", () => {
@@ -170,6 +171,17 @@ describe("Quiz", function() {
 
                 expect(quiz["playAudio"]).toHaveBeenCalledWith(TerminalQuiz.QuizSounds.Background, true);
             });
+
+            it("should call onStart callback", function() {
+
+                options.onStart = (): void => { }
+
+                spyOn(options, 'onStart');
+
+                quiz.start();
+
+                expect(options.onStart).toHaveBeenCalled();
+            });
         });
     });
 
@@ -220,7 +232,7 @@ describe("Quiz", function() {
 
             spyOn(quiz, 'playAudio');
 
-            spyOn(quiz, 'onAnswered');
+            spyOn(quiz, 'onQuestionAnswered');
 
             spyOn(quiz, 'moveToNextQuestion');
         });
@@ -234,9 +246,9 @@ describe("Quiz", function() {
                 quiz.validateCurrentQuestion();
             })
 
-            it("should raise onAnswered event", function() {
+            it("should raise onQuestionAnswered event", function() {
 
-                expect(quiz["onAnswered"]).toHaveBeenCalledWith(question);
+                expect(quiz.onQuestionAnswered).toHaveBeenCalledWith(question);
             });
 
             it("should move to next question", function() {
@@ -263,7 +275,7 @@ describe("Quiz", function() {
 
                 expect(quiz.moveToNextQuestion).not.toHaveBeenCalled();
 
-                expect(quiz["onAnswered"]).not.toHaveBeenCalled();
+                expect(quiz.onQuestionAnswered).not.toHaveBeenCalled();
             });
 
             it("should play the WrongAnswer sound", function() {
@@ -389,4 +401,91 @@ describe("Quiz", function() {
             })
         });
     });
+
+    describe("onQuestionAnswered", () => {
+
+        describe("onQuestionAnswered", () => {
+
+            var question = null;
+            var answer = null;
+
+            beforeEach(() => {
+
+                question = jasmine.createSpyObj("Question", ["getWhenAnsweredCallback"]);
+                answer = {
+                    parsedAnswer: {}
+                };
+            });
+
+            it("should call onQuestionAnswered callback", () => {
+
+                options.onQuestionAnswered = () => {};
+
+                spyOn(options, 'onQuestionAnswered');
+                spyOn(quiz, 'getAnswer').and.returnValue(answer);
+
+                quiz.onQuestionAnswered(question);
+
+                expect(quiz.getAnswer).toHaveBeenCalledWith(question);
+                expect(options.onQuestionAnswered).toHaveBeenCalledWith(question, answer.parsedAnswer);
+            });
+        });
+    });
+
+    describe("renderQuestion", () => {
+
+        var element = null;
+
+        var question = null;
+
+        beforeEach(() => {
+
+            spyOn(quiz, 'clear');
+
+            spyOn(quiz, 'echo');
+
+            element = {};
+
+            question = jasmine.createSpyObj("Question", ["render"]);
+        });
+
+        it("should echo the question render result", () => {
+
+            (<jasmine.Spy>question.render).and.callFake(() => {
+
+                // Should clear before rendering
+                expect(quiz.clear).toHaveBeenCalled();
+
+                return element;
+            });
+
+            quiz.renderQuestion(question);
+
+            expect(quiz.echo).toHaveBeenCalled();
+
+            expect((<jasmine.Spy>quiz.echo).calls.mostRecent().args[0]).toBe(element);
+        })
+
+        describe("onQuestionRendered specified", () => {
+
+            it("should call callback after the question was rendered", () => {
+
+                options.onQuestionRendered = (question) => {};
+
+                spyOn(options, 'onQuestionRendered');
+
+                (<jasmine.Spy>question.render).and.callFake(() => {
+
+                    // Should only trigger event after the question was rendered
+                    expect(options.onQuestionRendered).not.toHaveBeenCalled();
+
+                    return element;
+                });
+
+                quiz.renderQuestion(question);
+
+                expect(options.onQuestionRendered).toHaveBeenCalledWith(question);
+            });
+        })
+    })
 });

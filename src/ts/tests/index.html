@@ -47,10 +47,10 @@
 
             quiz.initialize();
 
-            quiz.askChoice("Choice").withTitle("A question?").withOpts(["First Choice", "Second Choice"]).asRequired();
-
             quiz.askText("RequiredText").withTitle("A required text question?").asRequired();
 
+            quiz.askChoice("Choice").withTitle("A question?").withOpts(["First Choice", "Second Choice"]).asRequired();
+            
             quiz.askText("TextWithPattern").withTitle("A non required text question with a pattern").withPattern(/\d\d\d/, "###");
 
             quiz.start();

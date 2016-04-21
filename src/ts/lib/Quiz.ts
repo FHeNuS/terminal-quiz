@@ -223,7 +223,6 @@ module TerminalQuiz {
         public clear(): void {
 
             this.term.clear();
-            this.term.set_prompt("> ");
         }
 
         /**
@@ -385,6 +384,11 @@ module TerminalQuiz {
 
             this.started = true;
 
+            if (this.opts.onStart) {
+
+                this.opts.onStart();
+            }
+
             this.askCurrentQuestion();
         }
 
@@ -397,18 +401,41 @@ module TerminalQuiz {
             return this.started;
         }
 
-        private renderQuestion(question: Question) {
+        /**
+        Renders the supplied question at the terminal.
+        @param question Question to render.
+        */
+        renderQuestion(question: Question) {
 
-            this.term.clear();
+            this.clear();
 
-            question.initialize();
+            var questionElem = question.render();
 
-            var questionElem = question.getProcessor().render();
+            var showPrompt = question.getProcessor().showPrompt();
+
+            // Hides prompt before rendering to avoid showing the promp
+            // before the question
+            if (!showPrompt) {
+
+                $(this.element).find(".cmd").hide();
+            }
 
             this.echo(questionElem, () => {
 
+                // Show the prompt after the question rendered
+                // to avoid showing it before
+                if (showPrompt) {
+
+                    $(this.element).find(".cmd").show();
+                }
+
                 question.getProcessor().onRendered(this.ctx);
             });
+
+            if (this.opts.onQuestionRendered) {
+
+                this.opts.onQuestionRendered(question);
+            }
         }
 
         /**
@@ -443,7 +470,7 @@ module TerminalQuiz {
 
             if (this.validateAnswer(question)) {
 
-                this.onAnswered(question);
+                this.onQuestionAnswered(question);
 
                 this.playAudio(QuizSounds.RightAnswer);
 
@@ -498,14 +525,21 @@ module TerminalQuiz {
             }
         }
 
-        private onAnswered(question: Question) {
+        onQuestionAnswered(question: Question) {
+
+            var answer = this.getAnswer(question);
 
             var whenAnswered = question.getWhenAnsweredCallback();
 
             if (whenAnswered) {
 
                 // Call the callback defined with the answer
-                whenAnswered(this.getAnswer(question).parsedAnswer)
+                whenAnswered(answer.parsedAnswer)
+            }
+
+            if (this.opts.onQuestionAnswered) {
+
+                this.opts.onQuestionAnswered(question, answer.parsedAnswer);
             }
         }
 
