@@ -494,7 +494,11 @@ module TerminalQuiz {
             return answer.isValid;
         }
 
-        moveToNextQuestion() {
+        moveToPreviousQuestion(): void {
+
+        }
+
+        moveToNextQuestion(): void {
 
             var isLastQuestion = this.currentQuestionIdx == (this.questions.length - 1);
 
