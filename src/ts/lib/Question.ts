@@ -41,9 +41,9 @@ module TerminalQuiz {
 
         private processor: QuestionProcessor<any>;
 
-        private description: (() => HTMLElement);
+        private description: string | (() => string) | (() => HTMLElement);
 
-        private title: (() => HTMLElement);
+        private title: string | (() => string) | (() => HTMLElement);
 
         private whenAnsweredCallback: (answer: any) => void;
 
@@ -62,31 +62,14 @@ module TerminalQuiz {
                 }
         */
 
-        private createContainer(name: String, content: any): () => HTMLElement {
 
-            return () => {
-
-                var container = $(`<div class="${name}">`);
-
-                if (typeof (content) === "string") {
-
-                    container.append(<string>content);
-
-                } else {
-
-                    container.append((<() => any>content)());
-                }
-
-                return container.get(0);
-            }
-        }
 
         withTitle(title: string): this
         withTitle(title: () => string): this
         withTitle(title: () => HTMLElement): this
         withTitle(title: string | (() => string) | (() => HTMLElement)): this {
 
-            this.title = this.createContainer("title", title);
+            this.title = title;
 
             return this;
         }
@@ -96,12 +79,12 @@ module TerminalQuiz {
         withDescription(description: () => HTMLElement): this
         withDescription(description: string | (() => string) | (() => HTMLElement)): this {
 
-            this.description = this.createContainer("description", description);
+            this.description = description;
 
             return this;
         }
 
-        getDescription(): () => HTMLElement {
+        getDescription(): string | (() => string) | (() => HTMLElement) {
 
             return this.description;
         }
@@ -126,7 +109,7 @@ module TerminalQuiz {
             return this.required;
         }
 
-        getTitle(): () => HTMLElement {
+        getTitle(): string | (() => string) | (() => HTMLElement) {
 
             return this.title;
         }

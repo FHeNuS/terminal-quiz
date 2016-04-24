@@ -401,6 +401,28 @@ module TerminalQuiz {
             return this.started;
         }
 
+        onQuestionRendered(question: Question) {
+
+            var showPrompt = question.getProcessor().showPrompt();
+
+            // Hides or shows the prompt after rendering
+            if (!showPrompt) {
+
+                $(this.element).find(".cmd").hide();
+
+            } else {
+
+                $(this.element).find(".cmd").show();
+            }
+
+            question.getProcessor().onRendered(this.ctx);
+
+            if (this.opts.onQuestionRendered) {
+
+                this.opts.onQuestionRendered(question);
+            }
+        }
+
         /**
         Renders the supplied question at the terminal.
         @param question Question to render.
@@ -411,31 +433,10 @@ module TerminalQuiz {
 
             var questionElem = question.render();
 
-            var showPrompt = question.getProcessor().showPrompt();
-
-            // Hides prompt before rendering to avoid showing the promp
-            // before the question
-            if (!showPrompt) {
-
-                $(this.element).find(".cmd").hide();
-            }
-
             this.echo(questionElem, () => {
 
-                // Show the prompt after the question rendered
-                // to avoid showing it before
-                if (showPrompt) {
-
-                    $(this.element).find(".cmd").show();
-                }
-
-                question.getProcessor().onRendered(this.ctx);
+                this.onQuestionRendered(question);
             });
-
-            if (this.opts.onQuestionRendered) {
-
-                this.opts.onQuestionRendered(question);
-            }
         }
 
         /**

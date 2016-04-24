@@ -11,18 +11,37 @@ module TerminalQuiz {
             return true;
         }
 
+        private createContainer(name: String, content: any): () => HTMLElement {
+
+            return () => {
+
+                var container = $(`<div class="${name}">`);
+
+                if (typeof (content) === "string") {
+
+                    container.append(<string>content);
+
+                } else {
+
+                    container.append((<() => any>content)());
+                }
+
+                return container.get(0);
+            }
+        }
+
         render(): HTMLElement {
 
             var questionElem = $(`<div class="${this.question.constructor.toString().match(/\w+/g)[1]}"></div>`);
 
             if (this.question.getTitle()) {
 
-                var titleElem = this.question.getTitle()();
+                var titleElem = this.createContainer("question-title", this.question.getTitle());
 
                 questionElem.append(titleElem);
             }
 
-            var descriptionElem = this.question.getDescription()();
+            var descriptionElem = this.createContainer("question-description", this.question.getDescription());
 
             if (descriptionElem)
                 questionElem.append(descriptionElem);

@@ -7,11 +7,13 @@ module TerminalQuiz {
 
         getDetail(): HTMLElement {
 
-            this.container = $('<ul class="choices"></ul>"');
+            this.container = $('<div class="choices">')
+
+            var ul = $('<ul></ul>').appendTo(this.container);
 
             this.question.getOpts().forEach((opt, idx) => {
 
-                this.container.append(`<li class="choice"><span class="position">${idx + 1}</span><span class="name">${this.question.getOptsName()(opt)}</span></li>`)
+                ul.append(`<li class="choice"><span class="position">${idx + 1}</span><span class="name">${this.question.getOptsName()(opt)}</span></li>`)
             });
 
             return this.container.get(0);
@@ -51,7 +53,7 @@ module TerminalQuiz {
         private clearSelectedChoice(): void {
 
             // Removes the selected class from all the choices before processing
-            this.container.children().each((idx, choice) => {
+            this.container.find("li").each((idx, choice) => {
 
                 $(choice).removeClass("selected");
             });
@@ -62,7 +64,7 @@ module TerminalQuiz {
             this.clearSelectedChoice();
 
             // Highlight the typed answer
-            this.container.children().eq(this.selectedIdx).addClass("selected");
+            this.container.find("li").eq(this.selectedIdx).addClass("selected");
         }
 
         public onKeyPress(typedKey: number, ctx: QuizContext): boolean {

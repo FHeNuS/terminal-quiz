@@ -17,7 +17,7 @@ describe("Question", function() {
 
             expect(dummyQuestion.getTitle()).not.toBeUndefined();
             expect(dummyQuestion.getTitle()).not.toBeNull();
-            expect($(dummyQuestion.getTitle()())[0].outerHTML).toBe('<div class="title">Some question?</div>');
+            expect(dummyQuestion.getTitle()).toBe('Some question?');
         });
 
         it("value is a string callback", () => {
@@ -26,16 +26,18 @@ describe("Question", function() {
 
             expect(dummyQuestion.getTitle()).not.toBeUndefined();
             expect(dummyQuestion.getTitle()).not.toBeNull();
-            expect($(dummyQuestion.getTitle()())[0].outerHTML).toBe('<div class="title">Some question?</div>');
+            expect((<() => string>dummyQuestion.getTitle())()).toBe('Some question?');
         });
 
         it("value is an element callback", () => {
 
-            dummyQuestion.withTitle(() => $("<span>Some question?</span>").get(0));
+            var elem = $("<span>Some question?</span>").get(0);
+
+            dummyQuestion.withTitle(() => elem);
 
             expect(dummyQuestion.getTitle()).not.toBeUndefined();
             expect(dummyQuestion.getTitle()).not.toBeNull();
-            expect($(dummyQuestion.getTitle()())[0].outerHTML).toBe('<div class="title"><span>Some question?</span></div>');
+            expect((<() => HTMLElement>dummyQuestion.getTitle())()).toBe(elem);
         });
     });
 
@@ -47,7 +49,7 @@ describe("Question", function() {
 
             expect(dummyQuestion.getDescription()).not.toBeUndefined();
             expect(dummyQuestion.getDescription()).not.toBeNull();
-            expect($(dummyQuestion.getDescription()())[0].outerHTML).toBe('<div class="description">Some question?</div>');
+            expect(dummyQuestion.getDescription()).toBe('Some question?');
         });
 
         it("value is a string callback", () => {
@@ -56,7 +58,7 @@ describe("Question", function() {
 
             expect(dummyQuestion.getDescription()).not.toBeUndefined();
             expect(dummyQuestion.getDescription()).not.toBeNull();
-            expect($(dummyQuestion.getDescription()())[0].outerHTML).toBe('<div class="description">Some question?</div>');
+            expect((<() => string>dummyQuestion.getDescription())()).toBe('Some question?');
         });
 
         it("value is an element callback", () => {
@@ -67,7 +69,7 @@ describe("Question", function() {
 
             expect(dummyQuestion.getDescription()).not.toBeUndefined();
             expect(dummyQuestion.getDescription()).not.toBeNull();
-            expect($(dummyQuestion.getDescription()()).children(":first")[0]).toBe(elem);
+            expect((<() => HTMLElement>dummyQuestion.getDescription())()).toBe(elem);
         });
     });
 

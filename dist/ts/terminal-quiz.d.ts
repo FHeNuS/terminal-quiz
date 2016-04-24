@@ -124,6 +124,7 @@ declare module TerminalQuiz {
         @returns false.
         */
         hasStarted(): boolean;
+        onQuestionRendered(question: Question): void;
         /**
         Renders the supplied question at the terminal.
         @param question Question to render.
@@ -138,6 +139,7 @@ declare module TerminalQuiz {
         */
         validateCurrentQuestion(): void;
         validateAnswer(question: any): boolean;
+        moveToPreviousQuestion(): void;
         moveToNextQuestion(): void;
         getCurrentQuestion(): Question;
         destroy(): void;
@@ -164,19 +166,18 @@ declare module TerminalQuiz {
         private whenAnsweredCallback;
         private required;
         private ifCallback;
-        private createContainer(name, content);
         withTitle(title: string): this;
         withTitle(title: () => string): this;
         withTitle(title: () => HTMLElement): this;
         withDescription(description: string): this;
         withDescription(description: () => string): this;
         withDescription(description: () => HTMLElement): this;
-        getDescription(): () => HTMLElement;
+        getDescription(): string | (() => string) | (() => HTMLElement);
         getIfCallback(): () => boolean;
         getName(): string;
         getProcessor(): QuestionProcessor<this>;
         getRequired(): () => boolean;
-        getTitle(): () => HTMLElement;
+        getTitle(): string | (() => string) | (() => HTMLElement);
         getWhenAnsweredCallback(): (answer: any) => void;
         /**
         Sets the question as required.
@@ -210,6 +211,7 @@ declare module TerminalQuiz {
         question: T;
         constructor(question: T);
         showPrompt(): boolean;
+        private createContainer(name, content);
         render(): HTMLElement;
         getDetail(): HTMLElement;
         onRendered(ctx: QuizContext): void;

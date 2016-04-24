@@ -444,9 +444,11 @@ describe("Quiz", function() {
 
             spyOn(quiz, 'echo');
 
+            spyOn(quiz, 'onQuestionRendered');
+
             element = {};
 
-            question = jasmine.createSpyObj("Question", ["render"]);
+            question = jasmine.createSpyObj("Question", ["render", "getProcessor"]);
         });
 
         it("should echo the question render result", () => {
@@ -463,29 +465,17 @@ describe("Quiz", function() {
 
             expect(quiz.echo).toHaveBeenCalled();
 
-            expect((<jasmine.Spy>quiz.echo).calls.mostRecent().args[0]).toBe(element);
-        })
+            var echoCallArgs = (<jasmine.Spy>quiz.echo).calls.mostRecent().args;
 
-        describe("onQuestionRendered specified", () => {
+            expect(echoCallArgs[0]).toBe(element);
 
-            it("should call callback after the question was rendered", () => {
+            // Should not call onQuestionRendered before echo animates
+            expect(quiz.onQuestionRendered).not.toHaveBeenCalledWith(question);
 
-                options.onQuestionRendered = (question) => {};
+            // Simulate onEndAnimate callBack
+            echoCallArgs[1]();
 
-                spyOn(options, 'onQuestionRendered');
-
-                (<jasmine.Spy>question.render).and.callFake(() => {
-
-                    // Should only trigger event after the question was rendered
-                    expect(options.onQuestionRendered).not.toHaveBeenCalled();
-
-                    return element;
-                });
-
-                quiz.renderQuestion(question);
-
-                expect(options.onQuestionRendered).toHaveBeenCalledWith(question);
-            });
+            expect(quiz.onQuestionRendered).toHaveBeenCalledWith(question);
         })
     })
 });
