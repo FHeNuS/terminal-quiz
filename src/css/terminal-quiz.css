@@ -56,17 +56,12 @@ ul {
 
 .choice .position:after {
 
-  content: '\00a0 \00a0-\00a0 \00a0';
+  content: '.';
 }
 
 .choice.selected {
 
     font-weight: bold;
-}
-
-.choice.selected .position:after {
-
-  content: '\00a0 \00a0-->\00a0 \00a0';
 }
 
 li {

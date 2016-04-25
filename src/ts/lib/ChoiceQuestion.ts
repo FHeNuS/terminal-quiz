@@ -13,7 +13,7 @@ module TerminalQuiz {
 
             this.question.getOpts().forEach((opt, idx) => {
 
-                ul.append(`<li class="choice"><span class="position">${idx + 1}</span><span class="name">${this.question.getOptsName()(opt)}</span></li>`)
+                ul.append(`<li class="choice"><span class="cursor"></span><span class="position">${idx + 1}</span><span class="name">${this.question.getOptsName()(opt)}</span></li>`)
             });
 
             return this.container.get(0);
