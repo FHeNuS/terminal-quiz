@@ -2,9 +2,11 @@ module TerminalQuiz {
 
     export interface QuizContext {
 
-        getAnswer(): string;
+        getAnswer(): Answer;
 
-        setAnswer(answer: string);
+        getTypedCommand(): string;
+
+        setTypedCommand(answer: string);
 
         echoSuccess(msg: string): void;
 
@@ -39,19 +41,32 @@ module TerminalQuiz {
 
         private separateTextFromElements(elem: Node, bag: any) {
 
+            var entry = {
+
+                elem: elem,
+                text: undefined
+            };
+
+            bag.push(entry);
+
+            if (elem["style"]) {
+
+                // Hides elements
+                elem["style"].display = 'none';
+            }
+
+            if (elem.nodeType == 3 && elem.textContent.trim().length > 0) {
+
+                // Strip the text from text elements
+                entry.text = elem.textContent;
+                elem.textContent = "";
+            }
+
             if (elem.hasChildNodes) {
 
                 for (var i = 0; i < elem.childNodes.length; i++) {
 
-                    var childNode = elem.childNodes[i];
-
-                    if (childNode.nodeType == 3 && childNode.textContent.trim().length > 0) {
-
-                        bag.push({ elem: childNode, text: childNode.textContent });
-                        childNode.textContent = "";
-                    }
-
-                    this.separateTextFromElements(childNode, bag);
+                    this.separateTextFromElements(elem.childNodes[i], bag);
                 }
             }
         }
@@ -104,31 +119,47 @@ module TerminalQuiz {
 
                                     bag = bags[bagIdx];
                                     elem = bag.elem;
-                                    text = bag.text;
 
-                                    elem.textContent += bag.text[charIdx++];
+                                    if (elem["style"]) {
 
-                                    if (charIdx == text.length) {
+                                        // Shows element
+                                        elem["style"].display = null;
+                                    }
 
-                                        // This means it reached the end of one element. Move to the next and restart char counter.
-                                        bagIdx++;
-                                        charIdx = 0;
+                                    if (bag.text) {
 
-                                        if (bagIdx == bags.length) {
+                                        // If there is text, appends th text
+                                        text = bag.text;
 
-                                            // This means that it processed all elements, remove interval and invoke callback
-                                            clearInterval(interval);
+                                        elem.textContent += bag.text[charIdx++];
 
-                                            this.stopAudio(QuizSounds.QuizTyping);
+                                        if (charIdx == text.length) {
 
-                                            // swap command with prompt
-                                            this.anim = false;
-
-                                            this.term.set_prompt(prompt);
-
-                                            if (onFinish)
-                                                onFinish();
+                                            // This means it reached the end of one element. Move to the next and restart char counter.
+                                            bagIdx++;
+                                            charIdx = 0;
                                         }
+
+                                    } else {
+
+                                        // Otherwise just shows element and goes to the next
+                                        bagIdx++;
+                                    }
+
+                                    if (bagIdx == bags.length) {
+
+                                        // This means that it processed all elements, remove interval and invoke callback
+                                        clearInterval(interval);
+
+                                        this.stopAudio(QuizSounds.QuizTyping);
+
+                                        // swap command with prompt
+                                        this.anim = false;
+
+                                        this.term.set_prompt(prompt);
+
+                                        if (onFinish)
+                                            onFinish();
                                     }
                                 }, delay);
 
@@ -233,9 +264,6 @@ module TerminalQuiz {
             if (!this.term)
                 throw new Error("Cannot end the quiz because it did not initialize!");
 
-            if (!this.started)
-                throw new Error("Cannot end the quiz because it did not start!");
-
             this.stopAudio(QuizSounds.Background);
 
             this.clear();
@@ -253,19 +281,6 @@ module TerminalQuiz {
         getAnswer(question: Question): Answer {
 
             return this.answers[question.getName()];
-        }
-
-        onUserCommand(cmd): void {
-
-            var question = this.getCurrentQuestion();
-
-            if (question) {
-
-                var answer = this.getAnswer(question);
-
-                answer.userAnswer = cmd;
-                answer.parsedAnswer = this.getCurrentQuestion().getProcessor().parseUserAnswer(answer.userAnswer);
-            }
         }
 
         onKeyPress(event: KeyboardEvent): boolean {
@@ -297,21 +312,30 @@ module TerminalQuiz {
             // initialize terminal
             this.term = window["$"](this.element).terminal((cmd: string, term) => {
 
-                this.onUserCommand(cmd);
-
-                this.validateCurrentQuestion();
             }, {
                     name: 'xxx',
                     //width: 800,a
                     //height: 300,
-                    keydown: (e) => {
+                    keydown: (e: KeyboardEvent) => {
+
+                        var propagate = undefined;
 
                         //disable keyboard when animating
                         if (this.anim) {
-                            return false;
+
+                            propagate = false;
+
                         } else {
-                            if (!this.onKeyPress(e))
-                                return false;
+
+                            if (!this.onKeyPress(e)) {
+
+                                propagate = false;
+
+                            } else if (e.keyCode === 13) {
+
+                                // If is enter key, parses the cmd
+                                this.moveToNextQuestion();
+                            }
                         }
                     },
 
@@ -328,9 +352,13 @@ module TerminalQuiz {
 
                 getAnswer: () => {
 
+                    return this.getAnswer(this.getCurrentQuestion());
+                },
+                getTypedCommand: () => {
+
                     return this.term.get_command();
                 },
-                setAnswer: (answer: string) => {
+                setTypedCommand: (answer: string) => {
 
                     this.term.set_command(answer);
                 },
@@ -380,7 +408,8 @@ module TerminalQuiz {
 
             this.currentQuestionIdx = 0;
 
-            this.playAudio(QuizSounds.Background, true);
+            if (this.opts.playBackground === undefined || this.opts.playBackground)
+                this.playAudio(QuizSounds.Background, true);
 
             this.started = true;
 
@@ -403,23 +432,21 @@ module TerminalQuiz {
 
         onQuestionRendered(question: Question) {
 
-            var showPrompt = question.getProcessor().showPrompt();
-
-            // Hides or shows the prompt after rendering
-            if (!showPrompt) {
-
-                $(this.element).find(".cmd").hide();
-
-            } else {
-
-                $(this.element).find(".cmd").show();
-            }
-
             question.getProcessor().onRendered(this.ctx);
 
             if (this.opts.onQuestionRendered) {
 
                 this.opts.onQuestionRendered(question);
+            }
+
+            // Simulates a mouse click so it focus on the terminal
+            $(this.element).click();
+
+            if (question.getProcessor().showPrompt()) {
+
+                // Shows the prompt after the question rendered so it appears
+                // natural
+                $(this.element).find(".cmd").show();
             }
         }
 
@@ -431,12 +458,36 @@ module TerminalQuiz {
 
             this.clear();
 
-            var questionElem = question.render();
+            question.initialize();
+
+            var questionElem = question.getProcessor().render(this.ctx);
+
+            var showPrompt = question.getProcessor().showPrompt();
+
+            // Hides the prompt before rendering so it does not flick for the
+            // user
+            if (!showPrompt) {
+
+                $(this.element).find(".cmd").hide();
+            }
 
             this.echo(questionElem, () => {
 
                 this.onQuestionRendered(question);
             });
+        }
+
+        /**
+        Indicates if the supplied question should be asked.
+        @param question The question to check.
+        @returnValue True or false.
+        */
+        shouldAskQuestion(question: Question) : boolean {
+
+            var ifCallBack = question.getIfCallback();
+
+            // Check if an If callback was supplied and if it returns true
+            return (!ifCallBack || ifCallBack());
         }
 
         /**
@@ -448,10 +499,7 @@ module TerminalQuiz {
 
             if (question) {
 
-                var ifCallBack = question.getIfCallback();
-
-                // Check if an If callback was supplied and if it returns true
-                if (!ifCallBack || ifCallBack()) {
+                if (this.shouldAskQuestion(question)) {
 
                     this.renderQuestion(question);
 
@@ -463,56 +511,149 @@ module TerminalQuiz {
         }
 
         /**
-        Goes to the next question.
+        Parses and validates current question.
         */
-        validateCurrentQuestion(): void {
+        parseCurrentQuestion(): Answer {
 
             var question = this.getCurrentQuestion();
 
-            if (this.validateAnswer(question)) {
+            var answer = this.getAnswer(question);
+
+            answer.userAnswer = this.ctx.getTypedCommand();
+
+            answer.parsedAnswer = this.getCurrentQuestion().getProcessor().parseUserAnswer(answer.userAnswer);
+
+            return answer;
+        }
+
+        validateCurrentQuestion(): boolean {
+
+            var question = this.getCurrentQuestion();
+            var answer = this.getAnswer(question);
+
+            return this.validateAnswer(question, answer);
+        }s
+
+        validateAnswer(question: Question, answer: Answer): boolean {
+
+            answer.isValid = true;
+
+            question.getProcessor().validateAnswer(answer.parsedAnswer, this.ctx);
+
+            if (answer.isValid) {
 
                 this.onQuestionAnswered(question);
 
                 this.playAudio(QuizSounds.RightAnswer);
 
-                this.moveToNextQuestion();
-
             } else {
 
                 this.playAudio(QuizSounds.WrongAnswer);
             }
-        }
-
-        validateAnswer(question): boolean {
-
-            var answer = this.getAnswer(question);
-
-            // By default is valid
-            answer.isValid = true;
-
-            question.getProcessor().validateAnswer(answer.parsedAnswer, this.ctx);
 
             return answer.isValid;
         }
 
-        moveToPreviousQuestion(): void {
+        /**
+        Because some answer may not be questioned, this method will find the
+        previous suitable question index.
+        @returns The previous question index if found or -1 if not.
+        */
+        getPreviousQuestionIndex(): number {
 
+            var previousIdx = -1;
+
+            if (this.currentQuestionIdx > 0) {
+
+                var idx = this.currentQuestionIdx;
+                var question = null;
+
+                while (idx > 0 && previousIdx == -1) {
+
+                    idx--;
+
+                    question = this.questions[idx];
+
+                    // Check if should ask question
+                    if (this.shouldAskQuestion(question)) {
+
+                        previousIdx = idx;
+                    }
+                }
+            }
+
+            return idx;
+        }
+
+        /**
+        Because some answer may not be questioned, this method will find the
+        next suitable question index.
+        @returns The next question index if found or -1 if not.
+        */
+        getNextQuestionIndex(): number {
+
+            var nextIdx = -1;
+
+            // Checks if it reached the end of the quiz, if it did returns -1 because
+            // there are no more questions
+            if (this.currentQuestionIdx < (this.questions.length - 1)) {
+
+                var idx = this.currentQuestionIdx;
+                var question = null;
+
+                while (idx < this.questions.length && nextIdx == -1) {
+
+                    idx++;
+
+                    question = this.questions[idx];
+
+                    // Check if should ask question
+                    if (this.shouldAskQuestion(question)) {
+
+                        nextIdx = idx;
+                    }
+                }
+            }
+
+            return nextIdx;
+        }
+
+        /**
+        Moves to the desired question.
+        @param idx Question index.
+        */
+        moveToQuestion(idx: number): void {
+
+            // Parses the question so that the current answer is saved
+            this.parseCurrentQuestion();
+
+            // Change current question idx
+            this.currentQuestionIdx = idx;
+
+            this.askCurrentQuestion();
         }
 
         moveToNextQuestion(): void {
 
-            var isLastQuestion = this.currentQuestionIdx == (this.questions.length - 1);
+            var question = this.getCurrentQuestion();
 
-            if (isLastQuestion) {
+            var answer = this.parseCurrentQuestion();
 
-                this.end();
+            if (this.validateAnswer(question, answer)) {
 
-            } else {
+                var nextQuestionIdx = this.getNextQuestionIndex();
 
-                // If it did not reach the last question, advances
-                this.currentQuestionIdx++;
+                if (nextQuestionIdx == -1) {
 
-                this.askCurrentQuestion();
+                    // No more questions, ends the quiz
+                    this.end();
+
+                } else {
+
+                    this.currentQuestionIdx = nextQuestionIdx;
+
+                    this.askCurrentQuestion();
+                }
             }
         }
 

@@ -220,101 +220,60 @@ describe("Quiz", function() {
         })
     })
 
-    describe("validateCurrentQuestion", () => {
+    describe("validateAnswer", () => {
 
         var question = null;
+        var answer = null;
+        var processor: TerminalQuiz.QuestionProcessor<any> = null;
 
         beforeEach(() => {
 
             question = new DummyQuestion("someQuestion");
 
-            spyOn(quiz, "getCurrentQuestion").and.returnValue(question);
+            answer = new TerminalQuiz.Answer();
+
+            processor = new TerminalQuiz.QuestionProcessor(question);
+
+            spyOn(question, 'getProcessor').and.returnValue(processor);
 
             spyOn(quiz, 'playAudio');
 
             spyOn(quiz, 'onQuestionAnswered');
 
-            spyOn(quiz, 'moveToNextQuestion');
         });
 
         describe("current question is valid", () => {
 
             beforeEach(() => {
 
-                spyOn(quiz, 'validateAnswer').and.returnValue(true);
+                spyOn(processor, 'validateAnswer').and.callFake((answer, messenger) => {
 
-                quiz.validateCurrentQuestion();
+                });
             })
 
             it("should raise onQuestionAnswered event", function() {
 
+                quiz.validateAnswer(question, answer);
+
                 expect(quiz.onQuestionAnswered).toHaveBeenCalledWith(question);
             });
 
-            it("should move to next question", function() {
+            it("should return true", function() {
 
-                expect(quiz.moveToNextQuestion).toHaveBeenCalled();
+                expect(quiz.validateAnswer(question, answer)).toBe(true);
             });
 
             it("should play the RightAnswer sound", function() {
+
+                quiz.validateAnswer(question, answer);
 
                 expect(quiz.playAudio).toHaveBeenCalledWith(TerminalQuiz.QuizSounds.RightAnswer);
             });
         })
 
-        describe("current question is invalid", () => {
+        describe("current question is not invalid", () => {
 
             beforeEach(() => {
-
-                spyOn(quiz, 'validateAnswer').and.returnValue(false);
-
-                quiz.validateCurrentQuestion();
-            })
-
-            it("should not ask the next question", function() {
-
-                expect(quiz.moveToNextQuestion).not.toHaveBeenCalled();
-
-                expect(quiz.onQuestionAnswered).not.toHaveBeenCalled();
-            });
-
-            it("should play the WrongAnswer sound", function() {
-
-                expect(quiz.playAudio).toHaveBeenCalledWith(TerminalQuiz.QuizSounds.WrongAnswer);
-            });
-        });
-    });
-
-    describe("validateAnswer", () => {
-
-        describe("has current question", () => {
-
-            var question: TerminalQuiz.Question = null;
-            var answer: TerminalQuiz.Answer = null;
-            var processor: TerminalQuiz.QuestionProcessor<any> = null;
-
-            beforeEach(() => {
-
-                question = new DummyQuestion("Dummy1");
-                answer = new TerminalQuiz.Answer();
-                processor = new TerminalQuiz.QuestionProcessor(question);
-                quiz.initialize();
-
-                spyOn(quiz, 'getAnswer').and.returnValue(answer);
-                spyOn(question, 'getProcessor').and.returnValue(processor);
-            });
-
-            it("question processor does not raise errors returns true", () => {
-
-                spyOn(processor, 'validateAnswer').and.callFake((answer, messenger) => {
-
-                });
-
-                expect(quiz.validateAnswer(question)).toBe(true);
-                expect(quiz.getAnswer).toHaveBeenCalledWith(question);
-            });
-
-            it("question processor does raise errors", () => {
 
                 spyOn(quiz, 'echoFail');
 
@@ -322,9 +281,25 @@ describe("Quiz", function() {
 
                     answer.isValid = false;
                 });
+            })
 
-                expect(quiz.validateAnswer(question)).toBe(false);
-                expect(quiz.getAnswer).toHaveBeenCalledWith(question);
+            it("should not ask the next question", () => {
+
+                quiz.validateAnswer(question, answer);
+
+                expect(quiz.onQuestionAnswered).not.toHaveBeenCalled();
+            });
+
+            it("should return false", () => {
+
+                expect(quiz.validateAnswer(question, answer)).toBe(false);
+            });
+
+            it("should play the WrongAnswer sound", () => {
+
+                quiz.validateAnswer(question, answer);
+
+                expect(quiz.playAudio).toHaveBeenCalledWith(TerminalQuiz.QuizSounds.WrongAnswer);
             });
         });
     });

@@ -50,8 +50,9 @@ declare module TerminalQuiz {
 
 declare module TerminalQuiz {
     interface QuizContext {
-        getAnswer(): string;
-        setAnswer(answer: string): any;
+        getAnswer(): Answer;
+        getTypedCommand(): string;
+        setTypedCommand(answer: string): any;
         echoSuccess(msg: string): void;
         echoFail(msg: string): void;
         playSound(sound: QuizSounds): any;
@@ -109,7 +110,6 @@ declare module TerminalQuiz {
         @returns The supplied question answer.
         */
         getAnswer(question: Question): Answer;
-        onUserCommand(cmd: any): void;
         onKeyPress(event: KeyboardEvent): boolean;
         /**
         Initializes the quiz without starting it.
@@ -131,15 +131,39 @@ declare module TerminalQuiz {
         */
         renderQuestion(question: Question): void;
         /**
+        Indicates if the supplied question should be asked.
+        @param question The question to check.
+        @returnValue True or false.
+        */
+        shouldAskQuestion(question: Question): boolean;
+        /**
         Asks the current question.
         */
         askCurrentQuestion(): void;
         /**
-        Goes to the next question.
+        Parses and validates current question.
         */
-        validateCurrentQuestion(): void;
-        validateAnswer(question: any): boolean;
-        moveToPreviousQuestion(): void;
+        parseCurrentQuestion(): Answer;
+        validateCurrentQuestion(): boolean;
+        s: any;
+        validateAnswer(question: Question, answer: Answer): boolean;
+        /**
+        Because some answer may not be questioned, this method will find the
+        previous suitable question index.
+        @returns The previous question index if found or -1 if not.
+        */
+        getPreviousQuestionIndex(): number;
+        /**
+        Because some answer may not be questioned, this method will find the
+        next suitable question index.
+        @returns The next question index if found or -1 if not.
+        */
+        getNextQuestionIndex(): number;
+        /**
+        Moves to the desired question.
+        @param idx Question index.
+        */
+        moveToQuestion(idx: number): void;
         moveToNextQuestion(): void;
         getCurrentQuestion(): Question;
         destroy(): void;
@@ -199,10 +223,6 @@ declare module TerminalQuiz {
         Sets the question processor.
         */
         withProcessor(processor: QuestionProcessor<any>): this;
-        /**
-        Renders this question and returns the resulting HTMLElement.
-        */
-        render(): HTMLElement;
     }
 }
 
@@ -212,8 +232,11 @@ declare module TerminalQuiz {
         constructor(question: T);
         showPrompt(): boolean;
         private createContainer(name, content);
-        render(): HTMLElement;
-        getDetail(): HTMLElement;
+        /**
+        Renders the question and returns the resulting HTMLElement.
+        */
+        render(ctx: QuizContext): HTMLElement;
+        getDetail(ctx: QuizContext): HTMLElement;
         onRendered(ctx: QuizContext): void;
         /**
         Parses the user answer.
@@ -243,7 +266,7 @@ declare module TerminalQuiz {
         initialize(): void;
     }
     class TextQuestionProcessor extends QuestionProcessor<TextQuestion> {
-        getDetail(): HTMLElement;
+        getDetail(ctx: QuizContext): HTMLElement;
         validateAnswer(parsedAnswer: any, ctx: QuizContext): void;
     }
     interface IQuiz {
@@ -255,7 +278,7 @@ declare module TerminalQuiz {
     class ChoiceQuestionProcessor extends QuestionProcessor<ChoiceQuestion<any>> {
         private container;
         private selectedIdx;
-        getDetail(): HTMLElement;
+        getDetail(ctx: QuizContext): HTMLElement;
         onRendered(ctx: QuizContext): void;
         private getUserAnswerIdx(userAnswer);
         parseUserAnswer(userAnswer: string): any;

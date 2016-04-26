@@ -30,7 +30,10 @@ module TerminalQuiz {
             }
         }
 
-        render(): HTMLElement {
+        /**
+        Renders the question and returns the resulting HTMLElement.
+        */
+        render(ctx: QuizContext): HTMLElement {
 
             var questionElem = $(`<div class="${this.question.constructor.toString().match(/\w+/g)[1]}"></div>`);
 
@@ -46,15 +49,15 @@ module TerminalQuiz {
             if (descriptionElem)
                 questionElem.append(descriptionElem);
 
-            var detailElem = this.getDetail();
+            var detailElem = this.getDetail(ctx);
 
             if (detailElem)
                 questionElem.append(detailElem);
 
-                return questionElem.get(0);
+            return questionElem.get(0);
         }
 
-        getDetail(): HTMLElement {
+        getDetail(ctx: QuizContext): HTMLElement {
 
             return null;
         }

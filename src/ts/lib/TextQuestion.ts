@@ -37,7 +37,15 @@ module TerminalQuiz {
 
     export class TextQuestionProcessor extends QuestionProcessor<TextQuestion> {
 
-        getDetail(): HTMLElement {
+        getDetail(ctx: QuizContext): HTMLElement {
+
+            var answer = ctx.getAnswer().userAnswer;
+
+            if (answer) {
+
+                // Sets the typed command if there is already an answer
+                ctx.setTypedCommand(answer);
+            }
 
             // Text questions by default do not have detail
             return null;
