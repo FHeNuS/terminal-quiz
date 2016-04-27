@@ -64,6 +64,12 @@ module TerminalQuiz {
 
         onRendered(ctx: QuizContext) {
 
+            var onRenderedCallBack = this.question.getWhenRenderedCallback();
+
+            if (onRenderedCallBack) {
+
+                onRenderedCallBack();
+            }
         }
 
         /**

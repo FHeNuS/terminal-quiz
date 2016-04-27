@@ -12,7 +12,9 @@ module TerminalQuiz {
 
         echoFail(msg: string): void;
 
-        playSound(sound: QuizSounds);
+        playSound(sound: QuizSounds, loop?: boolean);
+
+        stopSound(sound: QuizSounds);
     }
 
     export interface IQuiz extends Quiz {
@@ -100,7 +102,7 @@ module TerminalQuiz {
 
                                 processed = true;
 
-                                this.playAudio(QuizSounds.QuizTyping, true);
+                                this.playSound(QuizSounds.QuizTyping, true);
 
                                 // Clears dummy element created
                                 container.empty();
@@ -151,7 +153,7 @@ module TerminalQuiz {
                                         // This means that it processed all elements, remove interval and invoke callback
                                         clearInterval(interval);
 
-                                        this.stopAudio(QuizSounds.QuizTyping);
+                                        this.stopSound(QuizSounds.QuizTyping);
 
                                         // swap command with prompt
                                         this.anim = false;
@@ -224,7 +226,7 @@ module TerminalQuiz {
         echoFail(msg: string): void {
 
             this.echo($(`<div class="echo-fail">${msg}</div>`).get(0));
-            this.playAudio(QuizSounds.WrongAnswer);
+            this.playSound(QuizSounds.WrongAnswer);
 
             var question = this.getCurrentQuestion();
 
@@ -245,7 +247,7 @@ module TerminalQuiz {
         echoSuccess(msg: string) {
 
             this.echo($(`<div class="echo-success">${msg}</div>`).get(0));
-            this.playAudio(QuizSounds.RightAnswer);
+            this.playSound(QuizSounds.RightAnswer);
         }
 
         /**
@@ -264,7 +266,7 @@ module TerminalQuiz {
             if (!this.term)
                 throw new Error("Cannot end the quiz because it did not initialize!");
 
-            this.stopAudio(QuizSounds.Background);
+            this.stopSound(QuizSounds.Background);
 
             this.clear();
 
@@ -289,7 +291,7 @@ module TerminalQuiz {
 
                 var currentQuestion = this.getCurrentQuestion();
 
-                this.playAudio(QuizSounds.UserTyping);
+                this.playSound(QuizSounds.UserTyping);
 
                 return currentQuestion.getProcessor().onKeyPress(event.keyCode, this.ctx);
 
@@ -372,9 +374,14 @@ module TerminalQuiz {
                     this.echoSuccess(msg);
                 },
 
-                playSound: (sound) => {
+                playSound: (sound, loop) => {
 
-                    this.playAudio(sound, false);
+                    this.playSound(sound, loop);
+                },
+
+                stopSound: (sound) => {
+
+                    this.stopSound(sound);
                 }
             }
 
@@ -409,7 +416,7 @@ module TerminalQuiz {
             this.currentQuestionIdx = 0;
 
             if (this.opts.playBackground === undefined || this.opts.playBackground)
-                this.playAudio(QuizSounds.Background, true);
+                this.playSound(QuizSounds.Background, true);
 
             this.started = true;
 
@@ -544,11 +551,11 @@ module TerminalQuiz {
 
                 this.onQuestionAnswered(question);
 
-                this.playAudio(QuizSounds.RightAnswer);
+                this.playSound(QuizSounds.RightAnswer);
 
             } else {
 
-                this.playAudio(QuizSounds.WrongAnswer);
+                this.playSound(QuizSounds.WrongAnswer);
             }
 
             return answer.isValid;
@@ -699,7 +706,7 @@ module TerminalQuiz {
             }
         }
 
-        playAudio(sound: QuizSounds, loop = false) {
+        playSound(sound: QuizSounds, loop = false) {
 
             var soundName = sound.toString();
 
@@ -707,7 +714,7 @@ module TerminalQuiz {
                 this.audioManager.play(soundName, loop);
         }
 
-        stopAudio(sound: QuizSounds) {
+        stopSound(sound: QuizSounds) {
 
             var soundName = sound.toString();
 

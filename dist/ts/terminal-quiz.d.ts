@@ -55,7 +55,8 @@ declare module TerminalQuiz {
         setTypedCommand(answer: string): any;
         echoSuccess(msg: string): void;
         echoFail(msg: string): void;
-        playSound(sound: QuizSounds): any;
+        playSound(sound: QuizSounds, loop?: boolean): any;
+        stopSound(sound: QuizSounds): any;
     }
     interface IQuiz extends Quiz {
     }
@@ -169,8 +170,8 @@ declare module TerminalQuiz {
         destroy(): void;
         onQuestionAnswered(question: Question): void;
         private onEnd();
-        playAudio(sound: QuizSounds, loop?: boolean): void;
-        stopAudio(sound: QuizSounds): void;
+        playSound(sound: QuizSounds, loop?: boolean): void;
+        stopSound(sound: QuizSounds): void;
     }
 }
 
@@ -188,6 +189,7 @@ declare module TerminalQuiz {
         private description;
         private title;
         private whenAnsweredCallback;
+        private whenRenderedCallback;
         private required;
         private ifCallback;
         withTitle(title: string): this;
@@ -203,6 +205,7 @@ declare module TerminalQuiz {
         getRequired(): () => boolean;
         getTitle(): string | (() => string) | (() => HTMLElement);
         getWhenAnsweredCallback(): (answer: any) => void;
+        getWhenRenderedCallback(): () => void;
         /**
         Sets the question as required.
         */
@@ -219,6 +222,7 @@ declare module TerminalQuiz {
         asRequired(required: () => boolean): this;
         onlyAskIf(callback: () => boolean): this;
         whenAnswered(callback: (answer: any) => void): this;
+        whenRendered(callback: () => void): this;
         /**
         Sets the question processor.
         */
@@ -278,6 +282,7 @@ declare module TerminalQuiz {
     class ChoiceQuestionProcessor extends QuestionProcessor<ChoiceQuestion<any>> {
         private container;
         private selectedIdx;
+        private createOption(opt, idx, ul, ctx);
         getDetail(ctx: QuizContext): HTMLElement;
         onRendered(ctx: QuizContext): void;
         private getUserAnswerIdx(userAnswer);

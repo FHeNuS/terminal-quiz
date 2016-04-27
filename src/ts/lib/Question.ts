@@ -47,6 +47,8 @@ module TerminalQuiz {
 
         private whenAnsweredCallback: (answer: any) => void;
 
+        private whenRenderedCallback: () => void;
+
         private required: () => boolean;
 
         private ifCallback: () => boolean;
@@ -119,6 +121,11 @@ module TerminalQuiz {
             return this.whenAnsweredCallback;
         }
 
+        getWhenRenderedCallback(): () => void {
+
+            return this.whenRenderedCallback;
+        }
+
         /**
         Sets the question as required.
         */
@@ -169,6 +176,13 @@ module TerminalQuiz {
         whenAnswered(callback: (answer: any) => void): this {
 
             this.whenAnsweredCallback = callback;
+
+            return this;
+        }
+
+        whenRendered(callback: () => void): this {
+
+            this.whenRenderedCallback = callback;
 
             return this;
         }

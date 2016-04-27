@@ -165,11 +165,11 @@ describe("Quiz", function() {
 
             it("should start the background audio", function() {
 
-                spyOn(quiz, 'playAudio');
+                spyOn(quiz, 'playSound');
 
                 quiz.start();
 
-                expect(quiz["playAudio"]).toHaveBeenCalledWith(TerminalQuiz.QuizSounds.Background, true);
+                expect(quiz.playSound).toHaveBeenCalledWith(TerminalQuiz.QuizSounds.Background, true);
             });
 
             it("should call onStart callback", function() {
@@ -267,7 +267,7 @@ describe("Quiz", function() {
 
                 quiz.validateAnswer(question, answer);
 
-                expect(quiz.playAudio).toHaveBeenCalledWith(TerminalQuiz.QuizSounds.RightAnswer);
+                expect(quiz.playSound).toHaveBeenCalledWith(TerminalQuiz.QuizSounds.RightAnswer);
             });
         })
 
@@ -299,7 +299,7 @@ describe("Quiz", function() {
 
                 quiz.validateAnswer(question, answer);
 
-                expect(quiz.playAudio).toHaveBeenCalledWith(TerminalQuiz.QuizSounds.WrongAnswer);
+                expect(quiz.playSound).toHaveBeenCalledWith(TerminalQuiz.QuizSounds.WrongAnswer);
             });
         });
     });
@@ -326,11 +326,11 @@ describe("Quiz", function() {
 
             it("should stop the background audio", function() {
 
-                spyOn(quiz, 'stopAudio');
+                spyOn(quiz, 'stopSound');
 
                 quiz.end();
 
-                expect(quiz["stopAudio"]).toHaveBeenCalledWith(TerminalQuiz.QuizSounds.Background);
+                expect(quiz.stopSound).toHaveBeenCalledWith(TerminalQuiz.QuizSounds.Background);
             });
 
             it("should notify end event listeners", function() {

@@ -5,6 +5,20 @@ module TerminalQuiz {
         private container: JQuery;
         private selectedIdx: number = 0;
 
+        private createOption(opt: any, idx: number, ul: JQuery, ctx: QuizContext) {
+
+            var li = $(`<li class="choice"><span class="cursor"></span><span class="position"></span><span class="name">${this.question.getOptsName()(opt)}</span></li>`)
+                .appendTo(ul)
+                .click(() => {
+
+                    this.selectedIdx = idx;
+
+                    this.displaySelectedChoice();
+
+                    ctx.playSound(QuizSounds.UserTyping);
+                });
+        }
+
         getDetail(ctx: QuizContext): HTMLElement {
 
             var answer = ctx.getAnswer().parsedAnswer;
@@ -21,7 +35,7 @@ module TerminalQuiz {
 
             this.question.getOpts().forEach((opt, idx) => {
 
-                ul.append(`<li class="choice"><span class="cursor"></span><span class="position"></span><span class="name">${this.question.getOptsName()(opt)}</span></li>`)
+                this.createOption(opt, idx, ul, ctx);
             });
 
             return this.container.get(0);
@@ -30,6 +44,8 @@ module TerminalQuiz {
         onRendered(ctx: QuizContext) {
 
             this.displaySelectedChoice();
+
+            super.onRendered(ctx);
         }
 
         private getUserAnswerIdx(userAnswer: number): number {
