@@ -8,9 +8,9 @@ module TerminalQuiz {
 
         setTypedCommand(answer: string);
 
-        echoSuccess(msg: string): void;
+        echoSuccess(msg: string|HTMLElement): void;
 
-        echoFail(msg: string): void;
+        echoFail(msg: string|HTMLElement): void;
 
         playSound(sound: QuizSounds, loop?: boolean);
 
@@ -31,7 +31,6 @@ module TerminalQuiz {
 
         private audioManager: QuizAudioManager;
         private currentQuestionIdx: number;
-        private started = false;
         private term: any;
         private questions = new Array<Question>();
         private answers: {
@@ -181,10 +180,19 @@ module TerminalQuiz {
 
         /**
         Writes a message to the terminal.
+        @param message String message to write.
+        @param callBack Callback that will be called when the message finishes
+        being written.
         */
-        echo(message: string, callBack?: () => void)
-        echo(message: HTMLElement, callBack?: () => void)
-        echo(message: HTMLElement|string, callBack?: () => void) {
+        echo(message: string, callBack?: () => void): void
+        /**
+        Writes a message to the terminal.
+        @param message HTMLElement to write.
+        @param callBack Callback that will be called when the message finishes
+        being written.
+        */
+        echo(message: HTMLElement, callBack?: () => void): void
+        echo(message: HTMLElement|string, callBack?: () => void): void {
 
             if (typeof(message) === "string") {
 
@@ -222,10 +230,12 @@ module TerminalQuiz {
         /**
         Writes an error message and marks the current question (if there is) as not valid.
         @param msg Message to write.
+        @param callBack Callback that will be called when the message finishes
+        being written.
         */
-        echoFail(msg: string): void {
+        echoFail(msg: HTMLElement|string, callBack?: () => void): void {
 
-            this.echo($(`<div class="echo-fail">${msg}</div>`).get(0));
+            this.echo($(`<div class="echo-fail"></div>`).append(msg).get(0), callBack);
             this.playSound(QuizSounds.WrongAnswer);
 
             var question = this.getCurrentQuestion();
@@ -243,10 +253,12 @@ module TerminalQuiz {
         /**
         Writes a success message.
         @param msg Message to write.
+        @param callBack Callback that will be called when the message finishes
+        being written.
         */
-        echoSuccess(msg: string) {
+        echoSuccess(msg: HTMLElement|string, callBack?: () => void) {
 
-            this.echo($(`<div class="echo-success">${msg}</div>`).get(0));
+            this.echo($(`<div class="echo-success"></div>`).append(msg).get(0), callBack);
             this.playSound(QuizSounds.RightAnswer);
         }
 
@@ -270,8 +282,6 @@ module TerminalQuiz {
 
             this.clear();
 
-            this.started = false;
-
             this.onEnd();
         }
 
@@ -285,24 +295,24 @@ module TerminalQuiz {
             return this.answers[question.getName()];
         }
 
+        /**
+        Returns the list of questions this quiz has.
+        @returnValue List of questions.
+        */
+        getQuestions(): Question[] {
+
+            return this.questions;
+        }
+
         onKeyPress(event: KeyboardEvent): boolean {
 
-            if (this.hasStarted()) {
+            var currentQuestion = this.getCurrentQuestion();
 
-                var currentQuestion = this.getCurrentQuestion();
+            if (currentQuestion) {
 
                 this.playSound(QuizSounds.UserTyping);
 
                 return currentQuestion.getProcessor().onKeyPress(event.keyCode, this.ctx);
-
-            } else {
-
-                if (this.opts.onKeyPress) {
-
-                    this.opts.onKeyPress(event);
-                }
-
-                return false;
             }
         }
 
@@ -418,23 +428,12 @@ module TerminalQuiz {
             if (this.opts.playBackground === undefined || this.opts.playBackground)
                 this.playSound(QuizSounds.Background, true);
 
-            this.started = true;
-
             if (this.opts.onStart) {
 
                 this.opts.onStart();
             }
 
             this.askCurrentQuestion();
-        }
-
-        /**
-        Indicates if the quiz already started or not.
-        @returns false.
-        */
-        hasStarted(): boolean {
-
-            return this.started;
         }
 
         onQuestionRendered(question: Question) {
@@ -458,6 +457,22 @@ module TerminalQuiz {
         }
 
         /**
+        Hides the prompt if the question processor indicates.
+        @prompt Question processor to check.
+        */
+        hidePromptIfNeeded(processor: QuestionProcessor<any>): void {
+
+            var showPrompt = processor.showPrompt();
+
+            // Hides the prompt before rendering so it does not flick for the
+            // user
+            if (!showPrompt) {
+
+                $(this.element).find(".cmd").hide();
+            }
+        }
+
+        /**
         Renders the supplied question at the terminal.
         @param question Question to render.
         */
@@ -467,16 +482,11 @@ module TerminalQuiz {
 
             question.initialize();
 
-            var questionElem = question.getProcessor().render(this.ctx);
+            var processor = question.getProcessor();
 
-            var showPrompt = question.getProcessor().showPrompt();
+            var questionElem = processor.render(this.ctx);
 
-            // Hides the prompt before rendering so it does not flick for the
-            // user
-            if (!showPrompt) {
-
-                $(this.element).find(".cmd").hide();
-            }
+            this.hidePromptIfNeeded(processor);
 
             this.echo(questionElem, () => {
 

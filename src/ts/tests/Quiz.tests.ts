@@ -156,13 +156,6 @@ describe("Quiz", function() {
                 expect(quiz.askCurrentQuestion).toHaveBeenCalled();
             });
 
-            it("should set the quiz as started", function() {
-
-                quiz.start();
-
-                expect(quiz.hasStarted()).toBe(true);
-            });
-
             it("should start the background audio", function() {
 
                 spyOn(quiz, 'playSound');
@@ -236,7 +229,7 @@ describe("Quiz", function() {
 
             spyOn(question, 'getProcessor').and.returnValue(processor);
 
-            spyOn(quiz, 'playAudio');
+            spyOn(quiz, 'playSound');
 
             spyOn(quiz, 'onQuestionAnswered');
 
@@ -306,74 +299,38 @@ describe("Quiz", function() {
 
     describe("end", () => {
 
-        describe("quiz has started", () => {
+        beforeEach(() => {
 
-            beforeEach(() => {
-
-                quiz.initialize();
-                quiz.ask(new DummyQuestion("Dummy").withTitle("Title"));
-                quiz.start();
-            });
-
-            it("should stop the background audio", function() {
-
-                spyOn(quiz, 'clear');
-
-                quiz.end();
-
-                expect(quiz.clear).toHaveBeenCalled();
-            });
-
-            it("should stop the background audio", function() {
-
-                spyOn(quiz, 'stopSound');
-
-                quiz.end();
-
-                expect(quiz.stopSound).toHaveBeenCalledWith(TerminalQuiz.QuizSounds.Background);
-            });
-
-            it("should notify end event listeners", function() {
-
-                spyOn(quiz, 'onEnd');
-
-                quiz.end();
-
-                expect(quiz["onEnd"]).toHaveBeenCalled();
-            });
-
-            it("should mark the test as not started", function() {
-
-                quiz.end();
-
-                expect(quiz.hasStarted()).toBe(false);
-            });
+            quiz.initialize();
+            quiz.ask(new DummyQuestion("Dummy").withTitle("Title"));
+            quiz.start();
         });
 
-        describe("quiz did not initialize", () => {
+        it("should stop the background audio", function() {
 
-            it("should throw an error", () => {
+            spyOn(quiz, 'clear');
 
-                expect(() => {
+            quiz.end();
 
-                    quiz.end();
-
-                }).toThrowError("Cannot end the quiz because it did not initialize!");
-            })
+            expect(quiz.clear).toHaveBeenCalled();
         });
 
-        describe("quiz did not start", () => {
+        it("should stop the background audio", function() {
 
-            it("should throw an error", () => {
+            spyOn(quiz, 'stopSound');
 
-                expect(() => {
+            quiz.end();
 
-                    quiz.initialize();
+            expect(quiz.stopSound).toHaveBeenCalledWith(TerminalQuiz.QuizSounds.Background);
+        });
 
-                    quiz.end();
+        it("should notify end event listeners", function() {
 
-                }).toThrowError("Cannot end the quiz because it did not start!");
-            })
+            spyOn(quiz, 'onEnd');
+
+            quiz.end();
+
+            expect(quiz["onEnd"]).toHaveBeenCalled();
         });
     });
 
@@ -413,6 +370,8 @@ describe("Quiz", function() {
 
         var question = null;
 
+        var processor = null;
+
         beforeEach(() => {
 
             spyOn(quiz, 'clear');
@@ -421,19 +380,37 @@ describe("Quiz", function() {
 
             spyOn(quiz, 'onQuestionRendered');
 
+            spyOn(quiz, 'hidePromptIfNeeded');
+
             element = {};
 
-            question = jasmine.createSpyObj("Question", ["render", "getProcessor"]);
+            question = jasmine.createSpyObj("Question", ["getProcessor", "initialize"]);
+
+            processor = jasmine.createSpyObj("QuestionProcessor", ["render"]);
+
+            (<jasmine.Spy>question.getProcessor).and.returnValue(processor);
         });
 
         it("should echo the question render result", () => {
 
-            (<jasmine.Spy>question.render).and.callFake(() => {
+            (<jasmine.Spy>question.initialize).and.callFake(() => {
 
                 // Should clear before rendering
                 expect(quiz.clear).toHaveBeenCalled();
+            });
+
+            (<jasmine.Spy>processor.render).and.callFake(() => {
+
+                // Should initialize before rendering
+                expect(question.initialize).toHaveBeenCalled();
 
                 return element;
+            });
+
+            (<jasmine.Spy>quiz.echo).and.callFake(() => {
+
+                // Should hide the prompt before rendering
+                expect(quiz.hidePromptIfNeeded).toHaveBeenCalledWith(processor);
             });
 
             quiz.renderQuestion(question);

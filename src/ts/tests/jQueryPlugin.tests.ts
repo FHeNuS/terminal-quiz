@@ -6,7 +6,5 @@ describe("jQueryPlugin", () => {
         var quiz = container.terminalQuiz({
 
         });
-
-        expect(quiz.hasStarted()).toBe(false);
     });
 });

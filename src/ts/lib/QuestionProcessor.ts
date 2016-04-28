@@ -94,7 +94,15 @@ module TerminalQuiz {
 
             if (isRequired && !parsedAnswer) {
 
-                ctx.echoFail('Please provide an answer for this question!');
+                var msg: any = this.question.getRequiredMessage();
+
+                if (typeof(msg) !== "string") {
+
+                    // If the msg is not a string, it is a callback
+                    msg = (msg)();
+                }
+
+                ctx.echoFail(msg);
             }
         }
 

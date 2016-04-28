@@ -53,8 +53,8 @@ declare module TerminalQuiz {
         getAnswer(): Answer;
         getTypedCommand(): string;
         setTypedCommand(answer: string): any;
-        echoSuccess(msg: string): void;
-        echoFail(msg: string): void;
+        echoSuccess(msg: string | HTMLElement): void;
+        echoFail(msg: string | HTMLElement): void;
         playSound(sound: QuizSounds, loop?: boolean): any;
         stopSound(sound: QuizSounds): any;
     }
@@ -67,7 +67,6 @@ declare module TerminalQuiz {
         constructor(element: Element, opts: IQuizOptions);
         private audioManager;
         private currentQuestionIdx;
-        private started;
         private term;
         private questions;
         private answers;
@@ -78,9 +77,18 @@ declare module TerminalQuiz {
         private animatedType(message, onFinish);
         /**
         Writes a message to the terminal.
+        @param message String message to write.
+        @param callBack Callback that will be called when the message finishes
+        being written.
         */
-        echo(message: string, callBack?: () => void): any;
-        echo(message: HTMLElement, callBack?: () => void): any;
+        echo(message: string, callBack?: () => void): void;
+        /**
+        Writes a message to the terminal.
+        @param message HTMLElement to write.
+        @param callBack Callback that will be called when the message finishes
+        being written.
+        */
+        echo(message: HTMLElement, callBack?: () => void): void;
         /**
         Add the supplied question to this Quiz.
         @param question The question to add.
@@ -90,13 +98,17 @@ declare module TerminalQuiz {
         /**
         Writes an error message and marks the current question (if there is) as not valid.
         @param msg Message to write.
+        @param callBack Callback that will be called when the message finishes
+        being written.
         */
-        echoFail(msg: string): void;
+        echoFail(msg: HTMLElement | string, callBack?: () => void): void;
         /**
         Writes a success message.
         @param msg Message to write.
+        @param callBack Callback that will be called when the message finishes
+        being written.
         */
-        echoSuccess(msg: string): void;
+        echoSuccess(msg: HTMLElement | string, callBack?: () => void): void;
         /**
         Clear the current output.
         */
@@ -111,6 +123,11 @@ declare module TerminalQuiz {
         @returns The supplied question answer.
         */
         getAnswer(question: Question): Answer;
+        /**
+        Returns the list of questions this quiz has.
+        @returnValue List of questions.
+        */
+        getQuestions(): Question[];
         onKeyPress(event: KeyboardEvent): boolean;
         /**
         Initializes the quiz without starting it.
@@ -120,12 +137,12 @@ declare module TerminalQuiz {
         Starts the quiz.
         */
         start(): void;
-        /**
-        Indicates if the quiz already started or not.
-        @returns false.
-        */
-        hasStarted(): boolean;
         onQuestionRendered(question: Question): void;
+        /**
+        Hides the prompt if the question processor indicates.
+        @prompt Question processor to check.
+        */
+        hidePromptIfNeeded(processor: QuestionProcessor<any>): void;
         /**
         Renders the supplied question at the terminal.
         @param question Question to render.
@@ -192,6 +209,10 @@ declare module TerminalQuiz {
         private whenRenderedCallback;
         private required;
         private ifCallback;
+        private requiredMessage;
+        withRequiredMessage(requiredMessage: string): this;
+        withRequiredMessage(requiredMessage: () => string): this;
+        withRequiredMessage(requiredMessage: () => HTMLElement): this;
         withTitle(title: string): this;
         withTitle(title: () => string): this;
         withTitle(title: () => HTMLElement): this;
@@ -203,6 +224,7 @@ declare module TerminalQuiz {
         getName(): string;
         getProcessor(): QuestionProcessor<this>;
         getRequired(): () => boolean;
+        getRequiredMessage(): string | (() => string) | (() => HTMLElement);
         getTitle(): string | (() => string) | (() => HTMLElement);
         getWhenAnsweredCallback(): (answer: any) => void;
         getWhenRenderedCallback(): () => void;

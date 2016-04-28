@@ -37,6 +37,11 @@ module TerminalQuiz {
 
                 this.withProcessor(new QuestionProcessor(this));
             }
+
+            if (!this.getRequiredMessage()) {
+
+                this.withRequiredMessage('Please provide an answer for this question!');
+            }
         }
 
         private processor: QuestionProcessor<any>;
@@ -53,6 +58,7 @@ module TerminalQuiz {
 
         private ifCallback: () => boolean;
 
+        private requiredMessage: string | (() => string) | (() => HTMLElement);
         /*
                 public _getParsedFullText(): string {
 
@@ -64,7 +70,15 @@ module TerminalQuiz {
                 }
         */
 
+        withRequiredMessage(requiredMessage: string): this
+        withRequiredMessage(requiredMessage: () => string): this
+        withRequiredMessage(requiredMessage: () => HTMLElement): this
+        withRequiredMessage(requiredMessage: string | (() => string) | (() => HTMLElement)): this {
 
+            this.requiredMessage = requiredMessage;
+
+            return this;
+        }
 
         withTitle(title: string): this
         withTitle(title: () => string): this
@@ -109,6 +123,11 @@ module TerminalQuiz {
         getRequired(): () => boolean {
 
             return this.required;
+        }
+
+        getRequiredMessage(): string | (() => string) | (() => HTMLElement) {
+
+            return this.requiredMessage;
         }
 
         getTitle(): string | (() => string) | (() => HTMLElement) {
