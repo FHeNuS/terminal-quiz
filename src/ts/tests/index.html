@@ -13,7 +13,8 @@
         </style>
     </head>
     <body>
-        <div id="container" style="border: 1px solid; width:200px;height:200px;"></div>
+      <div id="container1" style="border: 1px solid; width:200px;height:200px;"></div>
+        <div id="container2" style="border: 1px solid; width:200px;height:200px;"></div>
         <!-- bower:js -->
         <script src="../../../bower_components/jquery/dist/jquery.js"></script>
         <script src="../../../bower_components/jquery.terminal/js/jquery.terminal-min.js"></script>
@@ -30,7 +31,7 @@
         <script type="text/javascript" src="../../../build/js/lib/ChoiceQuestion.js"></script>
         <script type="text/javascript">
 
-            var quiz = new TerminalQuiz.Quiz($("#container").get(0), {
+            var quiz = new TerminalQuiz.Quiz($("#container1").get(0), {
 
               typeMessageDelay: 50,
 
@@ -50,10 +51,31 @@
             quiz.askText("RequiredText").withTitle("A required text question?").asRequired();
 
             quiz.askChoice("Choice").withTitle("A question?").withOpts(["First Choice", "Second Choice"]).asRequired();
-            
+
             quiz.askText("TextWithPattern").withTitle("A non required text question with a pattern").withPattern(/\d\d\d/, "###");
 
             quiz.start();
+
+            var quiz2 = new TerminalQuiz.Quiz($("#container2").get(0), {
+
+              typeMessageDelay: 50,
+
+              backgroundSoundUrl: "Background.wav",
+
+              quizTypingSoundUrl: "Type.wav",
+
+              rightAnswerSoundUrl: "Right.wav",
+
+              wrongAnswerSoundUrl: "Wrong.wav",
+
+              userTypingSoundUrl: "Menu.wav"
+            });
+
+            quiz2.initialize();
+
+            quiz2.askText("RequiredText").withTitle("A required text question 222?").asRequired();
+
+            quiz2.start();
 
         </script>
     </body>
