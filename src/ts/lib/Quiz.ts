@@ -206,6 +206,9 @@ module TerminalQuiz {
 
                 this.term.set_command(currentCmd);
 
+                // Simulates a mouse click so it focus on the terminal
+                $(this.element).click();
+
                 if (callBack)
                     callBack();
             });
@@ -445,9 +448,6 @@ module TerminalQuiz {
                 this.opts.onQuestionRendered(question);
             }
 
-            // Simulates a mouse click so it focus on the terminal
-            $(this.element).click();
-
             if (question.getProcessor().showPrompt()) {
 
                 // Shows the prompt after the question rendered so it appears
@@ -650,13 +650,19 @@ module TerminalQuiz {
             this.askCurrentQuestion();
         }
 
-        moveToNextQuestion(): void {
+        /**
+        Moves to the next question, only if the current question is valid.
+        @returns A boolean value indicating that it could move to the next question because the current question is valid.
+        */
+        moveToNextQuestion(): boolean {
 
             var question = this.getCurrentQuestion();
 
             var answer = this.parseCurrentQuestion();
 
-            if (this.validateAnswer(question, answer)) {
+            var isValid = this.validateAnswer(question, answer);
+
+            if (isValid) {
 
                 var nextQuestionIdx = this.getNextQuestionIndex();
 
@@ -672,6 +678,8 @@ module TerminalQuiz {
                     this.askCurrentQuestion();
                 }
             }
+
+            return isValid;
         }
 
         getCurrentQuestion(): Question {

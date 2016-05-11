@@ -182,7 +182,11 @@ declare module TerminalQuiz {
         @param idx Question index.
         */
         moveToQuestion(idx: number): void;
-        moveToNextQuestion(): void;
+        /**
+        Moves to the next question, only if the current question is valid.
+        @returns A boolean value indicating that it could move to the next question because the current question is valid.
+        */
+        moveToNextQuestion(): boolean;
         getCurrentQuestion(): Question;
         destroy(): void;
         onQuestionAnswered(question: Question): void;
