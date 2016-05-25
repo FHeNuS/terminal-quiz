@@ -18,19 +18,29 @@ module TerminalQuiz {
             [audioUrl: string]: number;
         } = {};
 
-        constructor() {
 
+        private soundArray = new Array<String>();
+
+
+        constructor() {
         }
 
         private createAudioElement(name, src): HTMLAudioElement {
+          var audio = document.createElement("audio");
+            if(typeof src === "string"){
+              audio.src = src;
+              document.body.appendChild(audio);
+              this.audioElements[name] = audio;
+              return audio;
+            } else {
+              this.soundArray = src;
+              audio.src = "1.wav";
+              document.body.appendChild(audio);
+              this.audioElements[name] = audio;
+              return audio;
 
-            var audio = document.createElement("audio");
-            audio.src = src;
-            document.body.appendChild(audio);
+            }
 
-            this.audioElements[name] = audio;
-
-            return audio;
         }
 
         isMuted(name: string) {
@@ -58,8 +68,7 @@ module TerminalQuiz {
             }
         }
 
-        addAudio(name: string, src: string) {
-
+        addAudio(name: string, src: string | Array<String>) {
             if (this.getAudio(name, false)) {
 
                 throw new Error(`The audio named '${name}' was already added!`);
@@ -72,14 +81,14 @@ module TerminalQuiz {
         }
 
         private getAudio(name, throwErrorIfNotFound = true): HTMLAudioElement {
-
             var audio = this.audioElements[name];
 
             if (!audio && throwErrorIfNotFound) {
-
                 throw new Error(`The audio "${name}" could not be found! Are you sure you called the 'addAudio' method?`);
             }
-
+            if(this.soundArray.length!=0 && name == "UserTypingAudio"){
+                audio.src = this.soundArray[Math.floor(Math.random()*(this.soundArray.length+1))].toString();
+            }
             return audio;
         }
 

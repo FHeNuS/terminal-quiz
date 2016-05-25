@@ -1,8 +1,16 @@
-html>
+<html>
     <head>
         <!-- bower:css -->
         <link rel="stylesheet" href="~/Content/Vendor/jquery.terminal.css"/>
         <!-- endbower -->
+        <style>
+          .choices .choice.selected .cursor:before {
+            content: '\00a0 \00a0-->\00a0 \00a0'
+          }
+          .choices .choice.selected {
+            font-weight: bold;
+          }
+        </style>
     </head>
     <body>
         <div id="container" style="border: 1px solid; width:200px;height:200px;"></div>
@@ -14,14 +22,38 @@ html>
         <script src="vendor/js/jasmine.js"></script>
         <script src="vendor/js/jasmine-jquery.js"></script>
         <!-- endbower -->
-        <script type="text/javascript" src="build/js/lib/Quiz.js"></script>
+        <script type="text/javascript" src="../../../build/js/lib/QuizSounds.js"></script>
+        <script type="text/javascript" src="../../../build/js/lib/QuizAudioManager.js"></script>
+        <script type="text/javascript" src="../../../build/js/lib/Quiz.js"></script>
         <script type="text/javascript" src="../../../build/js/lib/Question.js"></script>
+        <script type="text/javascript" src="../../../build/js/lib/QuestionProcessor.js"></script>
+        <script type="text/javascript" src="../../../build/js/lib/Answer.js"></script>
         <script type="text/javascript" src="../../../build/js/lib/TextQuestion.js"></script>
+        <script type="text/javascript" src="../../../build/js/lib/ChoiceQuestion.js"></script>
         <script type="text/javascript">
 
             var quiz = new TerminalQuiz.Quiz($("#container").get(0), {
 
+              typeMessageDelay: 50,
+
+              backgroundSoundUrl: "Background.wav",
+
+              quizTypingSoundUrl: "Type.wav",
+
+              rightAnswerSoundUrl: "Right.wav",
+
+              wrongAnswerSoundUrl: "Wrong.wav",
+
+              userTypingSoundUrl: "Menu.wav"
             });
+
+            quiz.initialize();
+
+            quiz.askText("RequiredText").withTitle("A required text question?").asRequired();
+
+            quiz.askChoice("Choice").withTitle("A question?").withOpts(["First Choice", "Second Choice"]).asRequired();
+            
+            quiz.askText("TextWithPattern").withTitle("A non required text question with a pattern").withPattern(/\d\d\d/, "###");
 
             quiz.start();
 
