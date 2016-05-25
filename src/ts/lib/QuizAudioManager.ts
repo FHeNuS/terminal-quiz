@@ -2,35 +2,43 @@ module TerminalQuiz {
 
     export class QuizAudioManager {
 
+        private audioSrcs: {
+            [name: string]: string | Array<string>;
+        } = {};
+
         private audioElements: {
-            [audioUrl: string]: HTMLAudioElement;
+            [name: string]: HTMLAudioElement;
         } = {};
 
         private shouldPlayAudioHash: {
-            [audioUrl: string]: boolean;
+            [name: string]: boolean;
         } = {};
 
         private audioLoopHash: {
-            [audioUrl: string]: () => void;
+            [name: string]: () => void;
         } = {};
 
         private audioLoopCounter: {
-            [audioUrl: string]: number;
+            [name: string]: number;
         } = {};
 
         constructor() {
-
         }
 
-        private createAudioElement(name, src): HTMLAudioElement {
+        private createAudioElement(name: string, src: string | Array<string>): HTMLAudioElement {
 
-            var audio = document.createElement("audio");
-            audio.src = src;
-            document.body.appendChild(audio);
-
-            this.audioElements[name] = audio;
-
-            return audio;
+          var audio = document.createElement("audio");
+            if(typeof src === "string"){
+              audio.src = src;
+              document.body.appendChild(audio);
+              this.audioElements[name] = audio;
+              return audio;
+            } else {
+              audio.src = src[0];
+              document.body.appendChild(audio);
+              this.audioElements[name] = audio;
+              return audio;
+            }
         }
 
         isMuted(name: string) {
@@ -58,7 +66,7 @@ module TerminalQuiz {
             }
         }
 
-        addAudio(name: string, src: string) {
+        addAudio(name: string, src: string | Array<string>) {
 
             if (this.getAudio(name, false)) {
 
@@ -66,6 +74,7 @@ module TerminalQuiz {
 
             } else {
 
+                this.audioSrcs[name] = src;
                 this.createAudioElement(name, src);
                 this.shouldPlayAudioHash[name] = true;
             }
@@ -76,8 +85,16 @@ module TerminalQuiz {
             var audio = this.audioElements[name];
 
             if (!audio && throwErrorIfNotFound) {
-
                 throw new Error(`The audio "${name}" could not be found! Are you sure you called the 'addAudio' method?`);
+            }
+
+            var src = this.audioSrcs[name];
+
+            if(src && typeof src !== "string") {
+
+                if(src.length != 0){
+                    audio.src = src[Math.floor(Math.random()*(src.length+1))].toString();
+                }
             }
 
             return audio;

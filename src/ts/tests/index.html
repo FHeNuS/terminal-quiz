@@ -35,7 +35,7 @@
 
               typeMessageDelay: 50,
 
-              backgroundSoundUrl: "Background.wav",
+              backgroundSoundUrl: "",
 
               quizTypingSoundUrl: "Type.wav",
 
@@ -44,6 +44,21 @@
               wrongAnswerSoundUrl: "Wrong.wav",
 
               userTypingSoundUrl: "Menu.wav"
+            });
+
+            var quiz2 = new TerminalQuiz.Quiz($("#container2").get(0), {
+
+              typeMessageDelay: 50,
+
+              backgroundSoundUrl: "",
+
+              quizTypingSoundUrl: "Type.wav",
+
+              rightAnswerSoundUrl: "Right.wav",
+
+              wrongAnswerSoundUrl: "Wrong.wav",
+
+              userTypingSoundUrl: new Array("1.wav", "2.wav", "3.wav", "4.wav", "5.wav", "6.wav", "7.wav", "8.wav", "9.wav"),
             });
 
             quiz.initialize();
@@ -55,25 +70,13 @@
             quiz.askText("TextWithPattern").withTitle("A non required text question with a pattern").withPattern(/\d\d\d/, "###");
 
             quiz.start();
-
-            var quiz2 = new TerminalQuiz.Quiz($("#container2").get(0), {
-
-              typeMessageDelay: 50,
-
-              backgroundSoundUrl: "Background.wav",
-
-              quizTypingSoundUrl: "Type.wav",
-
-              rightAnswerSoundUrl: "Right.wav",
-
-              wrongAnswerSoundUrl: "Wrong.wav",
-
-              userTypingSoundUrl: "Menu.wav"
-            });
-
             quiz2.initialize();
 
-            quiz2.askText("RequiredText").withTitle("A required text question 222?").asRequired();
+            quiz2.askText("RequiredText").withTitle("A required text question?").asRequired();
+
+            quiz2.askChoice("Choice").withTitle("A question?").withOpts(["First Choice", "Second Choice"]).asRequired();
+
+            quiz2.askText("TextWithPattern").withTitle("A non required text question with a pattern").withPattern(/\d\d\d/, "###");
 
             quiz2.start();
 
