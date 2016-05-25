@@ -24,7 +24,7 @@ module TerminalQuiz {
 
         quizTypingSoundUrl?: string;
 
-        userTypingSoundUrl?: string;
+        userTypingSoundUrl?: string  | Array<string>;
 
         rightAnswerSoundUrl?: string;
 
