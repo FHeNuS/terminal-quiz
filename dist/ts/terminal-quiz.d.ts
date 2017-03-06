@@ -11,7 +11,7 @@ declare module TerminalQuiz {
         greetings?: string;
         backgroundSoundUrl?: string;
         quizTypingSoundUrl?: string;
-        userTypingSoundUrl?: string;
+        userTypingSoundUrl?: string | Array<string>;
         rightAnswerSoundUrl?: string;
         wrongAnswerSoundUrl?: string;
         playBackground?: boolean;
@@ -30,6 +30,7 @@ declare module TerminalQuiz {
 
 declare module TerminalQuiz {
     class QuizAudioManager {
+        private audioSrcs;
         private audioElements;
         private shouldPlayAudioHash;
         private audioLoopHash;
@@ -39,7 +40,7 @@ declare module TerminalQuiz {
         isMuted(name: string): boolean;
         unmute(name: string): void;
         mute(name: string): void;
-        addAudio(name: string, src: string): void;
+        addAudio(name: string, src: string | Array<string>): void;
         private getAudio(name, throwErrorIfNotFound?);
         hasAudio(name: string): boolean;
         play(name: string, loop?: boolean): void;
